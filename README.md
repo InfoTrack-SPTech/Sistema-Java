@@ -1,2 +1,2 @@
 # Sistema-Java
-Log via Consola com datas
+Código referente ao sistema java.
