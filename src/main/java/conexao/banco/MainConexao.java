@@ -1,5 +1,4 @@
 package conexao.banco;
-
 import org.springframework.jdbc.core.JdbcTemplate;
 
 public class MainConexao {
