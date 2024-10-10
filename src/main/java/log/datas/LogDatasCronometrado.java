@@ -7,7 +7,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-public class LogDatas {
+public class LogDatasCronometrado {
     public static void main(String[] args) {
 
         // tarefa que será executada em 1 thread, quanto maior o parametro, maior o numero de tarefas sendo executadas simultaneamente
@@ -43,7 +43,7 @@ public class LogDatas {
             }
         };
 
-         /* aqui definimos os intervalos entre os logs, 1° funcao que executaremos, 2° delay para executar dps que
+         /* aqui definimos os intervalos entre os log.datas.logs, 1° funcao que executaremos, 2° delay para executar dps que
          a outra tarefa foi executada(delay de zero), 3° qual será o tempo entre os intervalos e 4° a medida
          de tempo passada na 3°, pode ser em segundos, minutos etc. */
         agendar.scheduleAtFixedRate(correr, 0, 5, TimeUnit.SECONDS);
