@@ -7,10 +7,10 @@ public class Bairro {
 
     public Bairro() {}
 
-    public Bairro(Integer idBairro, String nome, Integer fkZona) {
+    public Bairro(Integer idBairro, String nome /*, Integer fkZona */) {
         this.idBairro = idBairro;
         this.nome = nome;
-        this.fkZona = fkZona;
+        // this.fkZona = fkZona;
     }
 
     public Integer getIdBairro() {
@@ -29,6 +29,7 @@ public class Bairro {
         this.nome = nome;
     }
 
+    /*
     public Integer getFkZona() {
         return fkZona;
     }
@@ -36,13 +37,14 @@ public class Bairro {
     public void setFkZona(Integer fkZona) {
         this.fkZona = fkZona;
     }
+    */
 
     @Override
     public String toString() {
         return "\nBairro {" +
                 "idBairro = " + idBairro +
                 ", nome = '" + nome + '\'' +
-                ", fkZona = " + fkZona +
+                //", fkZona = " + fkZona +
                 '}';
     }
 }
