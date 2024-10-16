@@ -1,34 +1,77 @@
 package dados.apaches3;
 
-
-import org.apache.poi.util.IOUtils;
+import conexao.banco.Bairro;
+import conexao.banco.ManipularDados;
+import software.amazon.awssdk.core.sync.ResponseTransformer;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.*;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 
 public class Main {
 
-    public static void main(String[] args) throws IOException {
-        IOUtils.setByteArrayMaxOverride(527836947);
-        String nomeArquivo = "SPDadosCriminais_2024.xlsx";
+    // se estiver true irá baixar todos os arquivos do bucket
+    static Boolean baixarConteudo = false;
 
-        // Carregando o arquivo excel
-        Path caminho = Path.of(nomeArquivo);
-        InputStream arquivo = Files.newInputStream(caminho);
+    public static void main(String[] args) throws Exception {
 
-        // Extraindo os livros do arquivo
-        LeitorExcel leitorExcel = new LeitorExcel();
-        List<Bairro> bairrosExtraidos = leitorExcel.extrarBairros(nomeArquivo, arquivo);
+        S3Client s3Client = new S3Provider().getS3Client();
+        listarBuckets(s3Client);
+        ListObjectsRequest listObj = listarObjetosBucket(s3Client);
+        if(baixarConteudo){
+            baixarObjetosBucket(s3Client, listObj);
+        }
 
-        // Fechando o arquivo após a extração
-        arquivo.close();
+        List<List<Object>> planilha = LeitorExcel.extrairDadosPlanilha("./src/main/java/dados/apaches3/arquivos/SPDadosCriminais_2024.xlsx");
 
-        System.out.println("Bairros extraídos:");
-        for (Bairro bairro : bairrosExtraidos) {
-            System.out.println(bairro);
+        ManipularDados manipular = new ManipularDados();
+        manipular.extrairBairros(planilha);
+
+    }
+
+    public static void listarBuckets(S3Client s3Client){
+        List<Bucket> buckets = s3Client.listBuckets().buckets();
+        System.out.println("Lista de buckets:");
+        for (Bucket bucket : buckets) {
+            System.out.println("- " + bucket.name());
+        }
+    }
+
+    public static ListObjectsRequest listarObjetosBucket(S3Client s3Client){
+        ListObjectsRequest listObjects = ListObjectsRequest.builder()
+                .bucket("s3-infotrack")
+                .build();
+
+        List<S3Object> objects = s3Client.listObjects(listObjects).contents();
+        for (S3Object object : objects) {
+            System.out.println("Objeto: " + object.key());
+        }
+
+        return listObjects;
+    }
+
+    public static void baixarObjetosBucket(S3Client s3Client, ListObjectsRequest listObjects) throws IOException {
+
+        List<S3Object> objects = s3Client.listObjects(listObjects).contents();
+        String caminho = "./src/main/java/dados/apaches3/arquivos";
+
+        if(baixarConteudo){
+            List<S3Object> arquivoDadosCriminais = s3Client.listObjects(listObjects).contents();
+            for (S3Object object : objects) {
+                GetObjectRequest getObjectRequest = GetObjectRequest.builder()
+                        .bucket("s3-infotrack")
+                        .key(object.key())
+                        .build();
+
+                InputStream objectContent = s3Client.getObject(getObjectRequest, ResponseTransformer.toInputStream());
+                Files.copy(objectContent, Paths.get( caminho, object.key()), StandardCopyOption.REPLACE_EXISTING);
+            }
         }
     }
 }

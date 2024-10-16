@@ -3,14 +3,12 @@ package conexao.banco;
 public class Bairro {
     private Integer idBairro;
     private String nome;
-    private Integer fkZona;
 
     public Bairro() {}
 
-    public Bairro(Integer idBairro, String nome /*, Integer fkZona */) {
+    public Bairro(Integer idBairro, String nome) {
         this.idBairro = idBairro;
         this.nome = nome;
-        // this.fkZona = fkZona;
     }
 
     public Integer getIdBairro() {
@@ -29,22 +27,11 @@ public class Bairro {
         this.nome = nome;
     }
 
-    /*
-    public Integer getFkZona() {
-        return fkZona;
-    }
-
-    public void setFkZona(Integer fkZona) {
-        this.fkZona = fkZona;
-    }
-    */
-
     @Override
     public String toString() {
         return "\nBairro {" +
                 "idBairro = " + idBairro +
                 ", nome = '" + nome + '\'' +
-                //", fkZona = " + fkZona +
                 '}';
     }
 }
