@@ -32,6 +32,9 @@ public class Main {
 
         ManipularDados manipular = new ManipularDados();
         manipular.extrairBairros(planilha);
+        manipular.extrairLogradouros(planilha);
+        manipular.extrairCrimes(planilha);
+        manipular.extrairLocais(planilha);
 
     }
 
