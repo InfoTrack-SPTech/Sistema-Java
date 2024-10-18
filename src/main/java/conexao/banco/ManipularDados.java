@@ -1,98 +1,76 @@
 package conexao.banco;
 
-import software.amazon.awssdk.services.s3.endpoints.internal.Value;
+import log.datas.GerarLog;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 public class ManipularDados {
 
-    static RegistrarDados bancoDados = new RegistrarDados();
-    public static void extrairBairros(List<List<Object>> planilha){
+    static RegistrarDados Bd = new RegistrarDados();
+
+    public ManipularDados() throws IOException {
+    }
+
+    public static void extrairBairros(List<List<Object>> planilha) throws IOException {
+
+        new GerarLog("extrairBairros", "Iniciando extração das informações");
 
         List<String> Bairros = new ArrayList<>();
         for (int item = 1; item <= planilha.size() - 1; item++){
 
-            // 12 -> coluna onde possui os valores das celulas dos bairros
-            String bairro = Objects.isNull(planilha.get(item).get(12)) ? "" : planilha.get(item).get(12).toString();
-            Boolean jaExtraido = Bairros.stream().anyMatch(x -> x.contains(bairro));
+            // 11 -> coluna onde possui os valores das celulas dos bairros
+            String bairro = Objects.isNull(planilha.get(item).get(11)) ? "" : planilha.get(item).get(11).toString();
+            Boolean jaExtraido = Bairros.stream().anyMatch(x -> x.equalsIgnoreCase(bairro));
             if(!jaExtraido && bairro.length() > 0){
                 Bairros.add(bairro);
             }
         }
-        bancoDados.cadastrarBairrosBd(Bairros);
+        new GerarLog("extrairBairros", "Finalizando extração das informações");
+        Bd.cadastrarBairrosBd(Bairros);
     }
+    public static void extrairLogradouro(List<List<Object>> planilha) throws IOException {
 
-    public static void extrairLogradouros(List<List<Object>> planilha){
+        new GerarLog("extrairLogradouro", "Iniciando extração das informações");
 
-        List<String> Nomes = new ArrayList<>();
-        List<String> Numeros = new ArrayList<>();
-        List<String> Latitudes = new ArrayList<>();
-        List<String> Longitudes = new ArrayList<>();
-        for (int item = 1; item <= planilha.size() - 1; item++){
+        List<Logradouro> ruas = new ArrayList<>();
+        Logradouro novoLogradouro = new Logradouro();
 
-            // 13 -> coluna onde possui os valores das celulas dos logradouros
-            String nome = Objects.isNull(planilha.get(item).get(13)) ? "" : planilha.get(item).get(13).toString();
+        for(int i = 1; i <= planilha.size() - 1; i++){
 
-            // 14 -> coluna onde possui os valores das celulas dos numeros
-            String numero = Objects.isNull(planilha.get(item).get(14)) ? "" : planilha.get(item).get(14).toString();
+            // 11 -> coluna onde possui os valores das celulas dos bairros
+            String bairro = Objects.isNull(planilha.get(i).get(11)) ? "????????????" : planilha.get(i).get(11).toString().toUpperCase();
+            Bairro dadosBairro = Bd.consultarBairroPorNome(bairro);
 
-            // 15 -> coluna onde possui os valores das celulas das latitudes
-            String latitude = Objects.isNull(planilha.get(item).get(15)) ? "" : planilha.get(item).get(15).toString();
+            // 12 -> coluna com o valor do endereço
+            String endereco = Objects.isNull(planilha.get(i).get(12)) ? "" : planilha.get(i).get(12).toString();
 
-            // 16 -> coluna onde possui os valores das celulas das longitudes
-            String longitude = Objects.isNull(planilha.get(item).get(16)) ? "" : planilha.get(item).get(16).toString();
+            // 13 -> coluna com o valor do numero do endereço
+            String numero = Objects.isNull(planilha.get(i).get(13)) ? "0" : planilha.get(i).get(13).toString();
 
-            Boolean jaExtraido = Nomes.stream().anyMatch(x -> x.contains(nome)) && Numeros.stream().anyMatch(x -> x.contains(numero)) && Latitudes.stream().anyMatch(x -> x.contains(latitude)) && Longitudes.stream().anyMatch(x -> x.contains(longitude));
-            if(!jaExtraido && nome.length() > 0 && numero.length() > 0 && latitude.length() > 0 && longitude.length() > 0){
-                Nomes.add(nome);
-                Numeros.add(numero);
-                Latitudes.add(latitude);
-                Longitudes.add(longitude);
+            // 14 -> coluna com o valor latitude
+            String vlLatitude = planilha.get(i).get(14).toString().replace(",", ".");
+            Double latitude = Objects.isNull(planilha.get(i).get(14)) || vlLatitude.equalsIgnoreCase("NULL") ? 0.0 : Double.parseDouble(vlLatitude);
+
+            // 15 -> coluna com o valor longitude
+            String vlLongitude = planilha.get(i).get(15).toString().replace(",", ".");
+            Double longitude = Objects.isNull(planilha.get(i).get(15)) || vlLongitude.equalsIgnoreCase("NULL") ? 0.0 : Double.parseDouble(vlLongitude);
+
+            if(!endereco.isEmpty()){
+                novoLogradouro.setNome(endereco);
             }
-        }
-        bancoDados.cadastrarLogradourosBd(Nomes,Numeros,Latitudes,Longitudes);
-    }
-
-    public static void extrairCrimes(List<List<Object>> planilha){
-
-        List<String> Crimes = new ArrayList<>();
-        List<String> Datas = new ArrayList<>();
-        List<String> Descricoes = new ArrayList<>();
-        for (int item = 1; item <= planilha.size() - 1; item++){
-
-            // 23 -> coluna onde possui os valores das celulas dos crimes
-            String crime = Objects.isNull(planilha.get(item).get(23)) ? "" : planilha.get(item).get(23).toString();
-
-            // 8 -> coluna onde possui os valores das celulas das datas
-            String dataOcorrencia = Objects.isNull(planilha.get(item).get(8)) ? "" : planilha.get(item).get(8).toString();
-
-            // 21 -> coluna onde possui os valores das celulas das rubricas
-            String descricao = Objects.isNull(planilha.get(item).get(21)) ? "" : planilha.get(item).get(21).toString();
-
-            Boolean jaExtraido = Crimes.stream().anyMatch(x -> x.contains(crime)) && Datas.stream().anyMatch(x -> x.contains(dataOcorrencia)) && Descricoes.stream().anyMatch(x -> x.contains(descricao));
-            if(!jaExtraido && crime.length() > 0 && dataOcorrencia.length() > 0 && descricao.length() > 0){
-                Crimes.add(crime);
-                Datas.add(dataOcorrencia);
-                Descricoes.add(descricao);
+            if(!numero.isEmpty()){
+                novoLogradouro.setNumero(numero);
             }
+            novoLogradouro.setLatitude(latitude);
+            novoLogradouro.setLongitude(longitude);
+            novoLogradouro.setFkBairro(dadosBairro.getIdBairro());
+            ruas.add(novoLogradouro);
         }
-        bancoDados.cadastrarCrimesBd(Crimes,Datas,Descricoes);
-    }
 
-    public static void extrairLocais(List<List<Object>> planilha){
-
-        List<String> Locais = new ArrayList<>();
-        for (int item = 1; item <= planilha.size() - 1; item++){
-
-            // 11 -> coluna onde possui os valores das celulas dos locais
-            String local = Objects.isNull(planilha.get(item).get(11)) ? "" : planilha.get(item).get(11).toString();
-            Boolean jaExtraido = Locais.stream().anyMatch(x -> x.contains(local));
-            if(!jaExtraido && local.length() > 0){
-                Locais.add(local);
-            }
-        }
-        bancoDados.cadastrarLocaisBd(Locais);
+        new GerarLog("ExtrairLogradouro", "Finalizando extração das informações");
+        Bd.cadastrarLogradourosBd(ruas);
     }
 }

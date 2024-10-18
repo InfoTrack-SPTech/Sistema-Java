@@ -3,16 +3,16 @@ package conexao.banco;
 public class Logradouro {
     private Integer idLogradouro;
     private String nome;
-    private String cep;
     private String numero;
     private Integer fkBairro;
+    private Double latitude;
+    private Double longitude;
 
     public Logradouro() {}
 
-    public Logradouro(Integer idLogradouro, String nome, String cep, String numero, Integer fkBairro) {
+    public Logradouro(Integer idLogradouro, String nome, String numero, Integer fkBairro) {
         this.idLogradouro = idLogradouro;
         this.nome = nome;
-        this.cep = cep;
         this.numero = numero;
         this.fkBairro = fkBairro;
     }
@@ -33,14 +33,6 @@ public class Logradouro {
         this.nome = nome;
     }
 
-    public String getCep() {
-        return cep;
-    }
-
-    public void setCep(String cep) {
-        this.cep = cep;
-    }
-
     public String getNumero() {
         return numero;
     }
@@ -57,12 +49,27 @@ public class Logradouro {
         this.fkBairro = fkBairro;
     }
 
+    public Double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(Double latitude) {
+        this.latitude = latitude;
+    }
+
+    public Double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(Double longitude) {
+        this.longitude = longitude;
+    }
+
     @Override
     public String toString() {
         return "\nLogradouro {" +
                 "idLogradouro = " + idLogradouro +
                 ", nome = '" + nome + '\'' +
-                ", cep = '" + cep + '\'' +
                 ", numero = '" + numero + '\'' +
                 ", fkBairro = " + fkBairro +
                 '}';

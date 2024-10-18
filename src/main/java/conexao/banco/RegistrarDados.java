@@ -1,7 +1,12 @@
 package conexao.banco;
 
+import log.datas.GerarLog;
+import org.apache.poi.ss.formula.functions.T;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapperResultSetExtractor;
 
+import java.io.IOException;
 import java.util.List;
 
 public class RegistrarDados {
@@ -9,51 +14,56 @@ public class RegistrarDados {
     static Conexao provedorBd = new Conexao();
     static JdbcTemplate connection = provedorBd.getConexaoDoBanco();
 
-    public static void cadastrarBairrosBd(List<String> bairros){
+    public static void cadastrarBairrosBd(List<String> bairros) throws IOException {
 
-        for (String bairro : bairros){
-            connection.execute("INSERT INTO bairro(nome) VALUES(\"%s\")".formatted(bairro));
+        new GerarLog("cadastrarBairrosBd", "Iniciando inserção dos registros");
+
+        String instrucaoSql = "INSERT INTO bairro(nome) VALUES";
+        for (int i = 0; i < bairros.size(); i++){
+
+            String bairro = bairros.get(i).replace("\"", "").replace("\\", "").replace("=", "");
+            if((i + 1) == bairros.size()){
+                instrucaoSql += """
+                    \n (\"%s\"); """.formatted(bairro);
+            } else{
+                instrucaoSql += """
+                    \n (\"%s\"), """.formatted(bairro);
+            }
         }
+
+        connection.execute(instrucaoSql);
+        new GerarLog("cadastrarBairrosBd", "Finalizando inserção dos registros");
+    }
+    public static void cadastrarLogradourosBd(List<Logradouro> ruas) throws IOException {
+
+        new GerarLog("cadastrarLogradourosBd", "Iniciando inserção dos registros");
+
+        String instrucaoSql = "INSERT INTO logradouro(nome, numero, latitude, longitude, fkBairro) VALUES";
+        for(int i = 0; i < ruas.size(); i++){
+
+            String nmRuaFormatada = ruas.get(i).getNome().replace("\"", "");
+            if((i + 1) == ruas.size()){
+                instrucaoSql += """
+                        \n (\"%s\", \"%s\", \"%s\", \"%s\", \"%s\"); """
+                        .formatted(nmRuaFormatada, ruas.get(i).getNumero(), ruas.get(i).getLatitude(), ruas.get(i).getLongitude(), ruas.get(i).getFkBairro());
+            } else{
+                instrucaoSql += """
+                        \n (\"%s\", \"%s\", \"%s\", \"%s\", \"%s\"), """
+                        .formatted(nmRuaFormatada, ruas.get(i).getNumero(), ruas.get(i).getLatitude(), ruas.get(i).getLongitude(), ruas.get(i).getFkBairro());
+            }
+        }
+
+        connection.execute(instrucaoSql);
+        new GerarLog("cadastrarLogradourosBd", "Finalizando inserção dos registros");
     }
 
-    public void cadastrarLogradourosBd(List<String> nomes, List<String> numeros, List<String> latitudes, List<String> longitudes) {
+    // Funcionalidades de consulta
+    public static Bairro consultarBairroPorNome(String nomeBairro){
 
-        for (String nome : nomes){
-            connection.execute("INSERT INTO logradouro(nome) VALUES(\"%s\")".formatted(nome));
-        }
+        System.out.println(nomeBairro.replace("\"", "").replace("\\", "").replace("=", ""));
+        Bairro bairro = connection.queryForObject("SELECT * FROM bairro WHERE nome = ? ORDER BY nome LIMIT 1",
+                new BeanPropertyRowMapper<>(Bairro.class), nomeBairro.replace("\"", "").replace("\\", "").replace("=", ""));
 
-        for (String numero : numeros){
-            connection.execute("INSERT INTO logradouro(numero) VALUES(\"%s\")".formatted(numero));
-        }
-
-        for (String latitude : latitudes){
-            connection.execute("INSERT INTO logradouro(latitude) VALUES(\"%s\")".formatted(latitude));
-        }
-
-        for (String longitude : longitudes){
-            connection.execute("INSERT INTO logradouro(longitude) VALUES(\"%s\")".formatted(longitude));
-        }
-    }
-
-    public static void cadastrarCrimesBd(List<String> crimes, List<String> datas, List<String> descricoes){
-
-        for (String crime : crimes){
-            connection.execute("INSERT INTO crime(natureza) VALUES(\"%s\")".formatted(crime));
-        }
-
-        for (String data : datas){
-            connection.execute("INSERT INTO crime(dataOcorrencia) VALUES(\"%s\")".formatted(data));
-        }
-
-        for (String descricao : descricoes){
-            connection.execute("INSERT INTO crime(descricao) VALUES(\"%s\")".formatted(descricao));
-        }
-    }
-
-    public void cadastrarLocaisBd(List<String> locais) {
-
-        for (String local : locais){
-            connection.execute("INSERT INTO local(nome) VALUES(\"%s\")".formatted(local));
-        }
+        return bairro;
     }
 }
