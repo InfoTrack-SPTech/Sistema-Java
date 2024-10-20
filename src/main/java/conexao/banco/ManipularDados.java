@@ -1,6 +1,7 @@
 package conexao.banco;
 
 import log.datas.GerarLog;
+import software.amazon.awssdk.services.s3.endpoints.internal.Value;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -35,17 +36,19 @@ public class ManipularDados {
 
         new GerarLog("extrairLogradouro", "Iniciando extração das informações");
 
-        List<Logradouro> ruas = new ArrayList<>();
-        Logradouro novoLogradouro = new Logradouro();
-
+        List<Bairro> bairros = Bd.consutarBairros();
+        List<Logradouro> ruasCadastradas = new ArrayList<>();
         for(int i = 1; i <= planilha.size() - 1; i++){
 
-            // 11 -> coluna onde possui os valores das celulas dos bairros
-            String bairro = Objects.isNull(planilha.get(i).get(11)) ? "????????????" : planilha.get(i).get(11).toString().toUpperCase();
-            Bairro dadosBairro = Bd.consultarBairroPorNome(bairro);
+            // "????????????" -> Caso o logradouro não possua endereço será associado está informação que está registrada no banco
+            String nomeBairro = Objects.isNull(planilha.get(i).get(11)) ? "????????????" : planilha.get(i).get(11).toString();
+            Integer idBairro = bairros.stream().filter(x -> x.getNome().equalsIgnoreCase(nomeBairro))
+                                                  .map(Bairro::getIdBairro)
+                                                  .findFirst()
+                                                  .orElse(0);
 
             // 12 -> coluna com o valor do endereço
-            String endereco = Objects.isNull(planilha.get(i).get(12)) ? "" : planilha.get(i).get(12).toString();
+            String endereco = Objects.isNull(planilha.get(i).get(12)) ? "Não Informado" : planilha.get(i).get(12).toString();
 
             // 13 -> coluna com o valor do numero do endereço
             String numero = Objects.isNull(planilha.get(i).get(13)) ? "0" : planilha.get(i).get(13).toString();
@@ -58,19 +61,16 @@ public class ManipularDados {
             String vlLongitude = planilha.get(i).get(15).toString().replace(",", ".");
             Double longitude = Objects.isNull(planilha.get(i).get(15)) || vlLongitude.equalsIgnoreCase("NULL") ? 0.0 : Double.parseDouble(vlLongitude);
 
-            if(!endereco.isEmpty()){
-                novoLogradouro.setNome(endereco);
+            // Verifica se a rua com mesmo nome e numero já esta adicionada, se sim, irá pular essa inserção no banco de dados
+            Boolean temRua = ruasCadastradas.stream().anyMatch(x -> x.getNome().equalsIgnoreCase(endereco) && x.getNumero().equals(numero));
+            if(!temRua){
+                ruasCadastradas.add(new Logradouro(0, endereco, numero, 0));
+                Bd.cadastrarLogradourosBd(new Logradouro(endereco, numero, idBairro, latitude, longitude));
             }
-            if(!numero.isEmpty()){
-                novoLogradouro.setNumero(numero);
-            }
-            novoLogradouro.setLatitude(latitude);
-            novoLogradouro.setLongitude(longitude);
-            novoLogradouro.setFkBairro(dadosBairro.getIdBairro());
-            ruas.add(novoLogradouro);
+
+            System.out.println("Quantidade lida: " + i);
         }
 
         new GerarLog("ExtrairLogradouro", "Finalizando extração das informações");
-        Bd.cadastrarLogradourosBd(ruas);
     }
 }

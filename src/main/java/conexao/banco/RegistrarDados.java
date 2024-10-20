@@ -1,6 +1,7 @@
 package conexao.banco;
 
 import log.datas.GerarLog;
+import org.apache.poi.hpsf.Decimal;
 import org.apache.poi.ss.formula.functions.T;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -34,35 +35,20 @@ public class RegistrarDados {
         connection.execute(instrucaoSql);
         new GerarLog("cadastrarBairrosBd", "Finalizando inserção dos registros");
     }
-    public static void cadastrarLogradourosBd(List<Logradouro> ruas) throws IOException {
+    public static void cadastrarLogradourosBd(Logradouro rua) throws IOException {
 
-        new GerarLog("cadastrarLogradourosBd", "Iniciando inserção dos registros");
-
-        String instrucaoSql = "INSERT INTO logradouro(nome, numero, latitude, longitude, fkBairro) VALUES";
-        for(int i = 0; i < ruas.size(); i++){
-
-            String nmRuaFormatada = ruas.get(i).getNome().replace("\"", "");
-            if((i + 1) == ruas.size()){
-                instrucaoSql += """
-                        \n (\"%s\", \"%s\", \"%s\", \"%s\", \"%s\"); """
-                        .formatted(nmRuaFormatada, ruas.get(i).getNumero(), ruas.get(i).getLatitude(), ruas.get(i).getLongitude(), ruas.get(i).getFkBairro());
-            } else{
-                instrucaoSql += """
-                        \n (\"%s\", \"%s\", \"%s\", \"%s\", \"%s\"), """
-                        .formatted(nmRuaFormatada, ruas.get(i).getNumero(), ruas.get(i).getLatitude(), ruas.get(i).getLongitude(), ruas.get(i).getFkBairro());
-            }
-        }
-
+        String endereco = rua.getNome().replace("\"", "").replace("\\", "").replace("=", "");
+        String instrucaoSql = """
+                INSERT INTO Logradouro (nome, numero, latitude, longitude, fkBairro) VALUES(\"%s\", \"%s\", \"%s\", \"%s\", \"%s\")"""
+                .formatted(endereco, rua.getNumero(), rua.getLatitude(), rua.getLongitude(), rua.getFkBairro());
         connection.execute(instrucaoSql);
-        new GerarLog("cadastrarLogradourosBd", "Finalizando inserção dos registros");
     }
 
     // Funcionalidades de consulta
-    public static Bairro consultarBairroPorNome(String nomeBairro){
+    public static List<Bairro> consutarBairros(){
 
-        System.out.println(nomeBairro.replace("\"", "").replace("\\", "").replace("=", ""));
-        Bairro bairro = connection.queryForObject("SELECT * FROM bairro WHERE nome = ? ORDER BY nome LIMIT 1",
-                new BeanPropertyRowMapper<>(Bairro.class), nomeBairro.replace("\"", "").replace("\\", "").replace("=", ""));
+        List<Bairro> bairro = connection.query("SELECT * FROM bairro",
+                new BeanPropertyRowMapper<>(Bairro.class));
 
         return bairro;
     }
