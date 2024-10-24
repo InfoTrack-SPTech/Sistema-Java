@@ -43,12 +43,49 @@ public class RegistrarDados {
         connection.execute(instrucaoSql);
     }
 
+    public static void cadastrarLocaisBd(List<String> locais) throws IOException {
+
+        new GerarLog("cadastrarLocaisBd", "Iniciando inserção dos registros");
+
+        String instrucaoSql = "INSERT INTO local(nome) VALUES";
+        for (int i = 0; i < locais.size(); i++){
+
+            String local = locais.get(i).replace("\"", "").replace("\\", "").replace("=", "");
+            if((i + 1) == locais.size()){
+                instrucaoSql += """
+                    \n (\"%s\"); """.formatted(local);
+            } else{
+                instrucaoSql += """
+                    \n (\"%s\"), """.formatted(local);
+            }
+        }
+
+        connection.execute(instrucaoSql);
+        new GerarLog("cadastrarLocaisBd", "Finalizando inserção dos registros");
+    }
+
     // Funcionalidades de consulta
-    public static Bairro consultarBairroPorNome(String nomeBairro){
+    public static List<Bairro> consultarBairros(){
 
             List<Bairro> bairro = connection.query("SELECT * FROM bairro",
                 new BeanPropertyRowMapper<>(Bairro.class));
 
         return bairro;
+    }
+
+    public static List<Local> consultarLocais(){
+
+        List<Local> local = connection.query("SELECT * FROM local",
+                new BeanPropertyRowMapper<>(Local.class));
+
+        return local;
+    }
+
+    public static List<Logradouro> consultarLogradouros(){
+
+        List<Logradouro> logradouros = connection.query("SELECT * FROM logradouro",
+                new BeanPropertyRowMapper<>(Logradouro.class));
+
+        return logradouros;
     }
 }

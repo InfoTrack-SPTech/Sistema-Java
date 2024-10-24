@@ -3,9 +3,9 @@ package conexao.banco;
 import log.datas.GerarLog;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+
+import static ManipularDados.Bd;
 
 public class ManipularDados {
 
@@ -35,7 +35,7 @@ public class ManipularDados {
 
         new GerarLog("extrairLogradouro", "Iniciando extração das informações");
 
-        List<Bairro> bairros = Bd.consutarBairros();
+        List<Bairro> bairros = Bd.consultarBairros();
         List<Logradouro> ruasCadastradas = new ArrayList<>();
         for(int i = 1; i <= planilha.size() - 1; i++){
 
@@ -72,4 +72,67 @@ public class ManipularDados {
 
         new GerarLog("ExtrairLogradouro", "Finalizando extração das informações");
     }
+
+    public static void extrairLocais(List<List<Object>> planilha) throws IOException {
+
+        new GerarLog("extrairLocais", "Iniciando extração das informações");
+        List<String> Locais = new ArrayList<>();
+        // Define os tipos de estabelecimentos permitidos
+        Set<String> tiposPermitidos = new HashSet<>(Arrays.asList(
+                "Casa", "Apartamento","Casas","Apartamentos", "Moradia", "Edícula/Fundos", "Condomínio Residencial",
+                "Lojas", "Restaurante", "Bar/Botequim", "Mercado", "Escritórios",
+                "Agência Bancária", "Salão de Beleza/Estética", "Café/Lanchonete",
+                "Padaria/Confeitaria", "Farmácia/Drogaria", "Autopeças", "Pet Shop",
+                "Shopping Center"
+        ));
+        for (int item = 1; item <= planilha.size() - 1; item++){
+
+            // 10 -> coluna onde possui os valores das celulas dos locais
+            String local = Objects.isNull(planilha.get(item).get(10)) || !tiposPermitidos.contains(planilha.get(item).get(10)) ? "" : planilha.get(item).get(10).toString();
+
+            // Verifica se o tipo de local está na lista de permitidos
+
+            Boolean jaExtraido = Locais.stream().anyMatch(x -> x.equalsIgnoreCase(local));
+            if(!jaExtraido && local.length() > 0){
+                Locais.add(local);
+            }
+        }
+        new GerarLog("extrairLocais", "Finalizando extração das informações");
+        Bd.cadastrarLocaisBd(Locais);
+    }
+}
+
+public static void extrairCrimes(List<List<Object>> planilha) throws IOException {
+
+    new GerarLog("extrairCrimes", "Iniciando extração das informações");
+
+    List<Local> locais =
+    List<Logradouro> logradouros = Bd.consultarLogradouros();
+    List<Crime> crimesCadastrados = new ArrayList<>();
+    for(int i = 1; i <= planilha.size() - 1; i++){
+
+        // "Não informado" -> Caso o crime não possua logradouro será associado está informação que está registrada no banco
+        String nomeLogradouro = Objects.isNull(planilha.get(i).get(12)) ? "Não informado" : planilha.get(i).get(12).toString();
+        Integer idLogradouro = logradouros.stream().filter(x -> x.getNome().equalsIgnoreCase(nomeLogradouro))
+                .map(Logradouro::getIdLogradouro)
+                .findFirst()
+                .orElse(0);
+
+        // "Não informado" -> Caso o crime não possua local será associado está informação que está registrada no banco
+        String nomeLocal = Objects.isNull(planilha.get(i).get(10)) ? "Não informado" : planilha.get(i).get(10).toString();
+        Integer idLocal = logradouros.stream().filter(x -> x.getNome().equalsIgnoreCase(nomeLocal))
+                .map(Local::getIdLocal)
+                .findFirst()
+                .orElse(0);
+
+        // 22 -> coluna com o valor da natureza do crime
+        String natureza = Objects.isNull(planilha.get(i).get(22)) ? "Não Informado" : planilha.get(i).get(22).toString();
+
+        // 20 -> coluna com o valor da descrição do crime
+        String descricao = Objects.isNull(planilha.get(i).get(20)) ? "Não Informado" : planilha.get(i).get(20).toString();
+
+        System.out.println("Quantidade lida: " + i);
+    }
+
+    new GerarLog("ExtrairCrime", "Finalizando extração das informações");
 }

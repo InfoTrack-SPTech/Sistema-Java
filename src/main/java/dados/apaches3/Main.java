@@ -21,18 +21,18 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
 
-        S3Client s3Client = new S3Provider().getS3Client();
-        listarBuckets(s3Client);
-        ListObjectsRequest listObj = listarObjetosBucket(s3Client);
-        if(baixarConteudo){
-            baixarObjetosBucket(s3Client, listObj);
-        }
+        //S3Client s3Client = new S3Provider().getS3Client();
+        //listarBuckets(s3Client);
+        //ListObjectsRequest listObj = listarObjetosBucket(s3Client);
+        //if(baixarConteudo){
+         //   baixarObjetosBucket(s3Client, listObj);
+       // }
 
         List<List<Object>> planilha = LeitorExcel.extrairDadosPlanilha("./src/main/java/dados/apaches3/arquivos/SPDadosCriminais_2024.xlsx");
 
         ManipularDados manipular = new ManipularDados();
-        manipular.extrairBairros(planilha);
-        manipular.extrairLogradouros(planilha);
+        //manipular.extrairBairros(planilha);
+       // manipular.extrairLogradouro(planilha);
         manipular.extrairCrimes(planilha);
         manipular.extrairLocais(planilha);
 

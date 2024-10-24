@@ -1,6 +1,7 @@
 package conexao.banco;
 
 public class Logradouro {
+    private String endereco;
     private Integer idLogradouro;
     private String nome;
     private String numero;
@@ -15,6 +16,14 @@ public class Logradouro {
         this.nome = nome;
         this.numero = numero;
         this.fkBairro = fkBairro;
+    }
+
+    public Logradouro(String endereco, String numero, Integer idBairro, Double latitude, Double longitude) {
+        this.endereco = endereco;
+        this.numero = numero;
+        this.latitude = latitude;
+        this.longitude = longitude;
+
     }
 
     public Integer getIdLogradouro() {
