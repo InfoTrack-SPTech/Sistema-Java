@@ -1,7 +1,6 @@
 package dados.apaches3;
 
-import conexao.banco.Bairro;
-import conexao.banco.ManipularDados;
+import conexao.banco.*;
 import software.amazon.awssdk.core.sync.ResponseTransformer;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
@@ -28,13 +27,20 @@ public class Main {
 //            baixarObjetosBucket(s3Client, listObj);
 //        }
 
-        List<List<Object>> planilha = LeitorExcel.extrairDadosPlanilha("./src/main/java/dados/apaches3/arquivos/SPDadosCriminais_2024.xlsx");
+//        List<List<Object>> planilha = LeitorExcel.extrairDadosPlanilha("./src/main/java/dados/apaches3/arquivos/SPDadosCriminais_2024.xlsx");
 
-        ManipularDados manipular = new ManipularDados();
-        manipular.extrairBairros(planilha);
-        manipular.extrairLogradouro(planilha);
-        manipular.extrairCrimes(planilha);
-        manipular.extrairLocais(planilha);
+        RegistrarDados x = new RegistrarDados();
+        List<Bairro> z = x.consultarBairros();
+        List<Logradouro> q = x.consultarLogradouros();
+
+        System.out.println(z.get(16));
+        System.out.println(q.get(1));
+
+//        ManipularDados manipular = new ManipularDados();
+//        manipular.extrairBairros(planilha);
+//        manipular.extrairLocais(planilha);
+//        manipular.extrairLogradouro(planilha);
+//        manipular.extrairCrimes(planilha);
 
     }
 

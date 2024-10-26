@@ -8,6 +8,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapperResultSetExtractor;
 
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.List;
 
 public class RegistrarDados {
@@ -15,13 +18,12 @@ public class RegistrarDados {
     static Conexao provedorBd = new Conexao();
     static JdbcTemplate connection = provedorBd.getConexaoDoBanco();
 
-    public static void cadastrarBairrosBd(List<String> bairros) throws IOException, SQLException {
+    public static void cadastrarBairrosBd(List<String> bairros, Connection conexao) throws IOException, SQLException {
 
         new GerarLog("cadastrarBairrosBd", "Iniciando inserção dos registros");
-
         conexao.setAutoCommit(true);
 
-      String instrucaoSql = "INSERT INTO bairro(nome) VALUES";
+        String instrucaoSql = "INSERT INTO bairro(nome) VALUES";
         for (int i = 0; i < bairros.size(); i++){
 
             String bairro = bairros.get(i).replace("\"", "").replace("\\", "").replace("=", "");
@@ -37,13 +39,12 @@ public class RegistrarDados {
         connection.execute(instrucaoSql);
         new GerarLog("cadastrarBairrosBd", "Finalizando inserção dos registros");
     }
-    
-    public static void cadastrarLocaisBd(List<String> locais) throws IOException, SQLException {
+
+    public static void cadastrarLocaisBd(List<String> locais, Connection conexao) throws IOException, SQLException {
 
         new GerarLog("cadastrarLocaisBd", "Iniciando inserção dos registros");
-
         conexao.setAutoCommit(true);
-      
+
         String instrucaoSql = "INSERT INTO local(nome) VALUES";
         for (int i = 0; i < locais.size(); i++){
 
@@ -57,11 +58,8 @@ public class RegistrarDados {
             }
         }
 
-        String endereco = rua.getNome().replace("\"", "").replace("\\", "").replace("=", "");
-        String instrucaoSql = """
-                INSERT INTO Logradouro (nome, numero, latitude, longitude, fkBairro) VALUES(\"%s\", \"%s\", \"%s\", \"%s\", \"%s\")"""
-                .formatted(endereco, rua.getNumero(), rua.getLatitude(), rua.getLongitude(), rua.getFkBairro());
         connection.execute(instrucaoSql);
+        new GerarLog("cadastrarLocaisBd", "Finalizando inserção dos registros");
     }
 
     // Funcionalidades de consulta

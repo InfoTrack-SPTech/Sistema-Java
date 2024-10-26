@@ -1,24 +1,18 @@
 package conexao.banco;
 
 public class Logradouro {
-    private String endereco;
+
     private Integer idLogradouro;
     private String nome;
     private String numero;
     private Integer fkBairro;
-    private Double latitude;
-    private Double longitude;
+    private String latitude;
+    private String longitude;
 
     public Logradouro() {}
 
-    public Logradouro(Integer idLogradouro, String nome, String numero, Integer fkBairro) {
+    public Logradouro(Integer idLogradouro, String nome, String numero, Integer fkBairro, String latitude, String longitude) {
         this.idLogradouro = idLogradouro;
-        this.nome = nome;
-        this.numero = numero;
-        this.fkBairro = fkBairro;
-    }
-
-    public Logradouro(String nome, String numero, Integer fkBairro, Double latitude, Double longitude) {
         this.nome = nome;
         this.numero = numero;
         this.fkBairro = fkBairro;
@@ -29,7 +23,6 @@ public class Logradouro {
     public Integer getIdLogradouro() {
         return idLogradouro;
     }
-
 
     public String getNome() {
         return nome;
@@ -55,20 +48,20 @@ public class Logradouro {
         this.fkBairro = fkBairro;
     }
 
-    public Double getLatitude() {
-        return latitude;
-    }
-
-    public void setLatitude(Double latitude) {
-        this.latitude = latitude;
-    }
-
-    public Double getLongitude() {
+    public String getLongitude() {
         return longitude;
     }
 
-    public void setLongitude(Double longitude) {
+    public void setLongitude(String longitude) {
         this.longitude = longitude;
+    }
+
+    public String getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(String latitude) {
+        this.latitude = latitude;
     }
 
     @Override
