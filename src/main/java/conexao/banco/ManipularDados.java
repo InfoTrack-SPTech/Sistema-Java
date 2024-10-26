@@ -1,6 +1,7 @@
 package conexao.banco;
 
 import log.datas.GerarLog;
+import software.amazon.awssdk.services.s3.endpoints.internal.Value;
 
 import java.io.IOException;
 import java.util.*;
@@ -10,11 +11,20 @@ import static ManipularDados.Bd;
 public class ManipularDados {
 
     static RegistrarDados Bd = new RegistrarDados();
+    static Connection ctx;
 
+    static {
+        try {
+            ctx = new Conexao().getConexao();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+  
     public ManipularDados() throws IOException {
     }
 
-    public static void extrairBairros(List<List<Object>> planilha) throws IOException {
+    public static void extrairBairros(List<List<Object>> planilha) throws IOException, SQLException {
 
         new GerarLog("extrairBairros", "Iniciando extração das informações");
 
@@ -31,20 +41,19 @@ public class ManipularDados {
         new GerarLog("extrairBairros", "Finalizando extração das informações");
         Bd.cadastrarBairrosBd(Bairros);
     }
-    public static void extrairLogradouro(List<List<Object>> planilha) throws IOException {
+    public static void extrairLogradouro(List<List<Object>> planilha) throws IOException, SQLException {
 
         new GerarLog("extrairLogradouro", "Iniciando extração das informações");
 
-        List<Bairro> bairros = Bd.consultarBairros();
+        List<Bairro> bairros = Bd.consutarBairros();
+        List<Logradouro> logradouros = Bd.consultarLogradouros();
         List<Logradouro> ruasCadastradas = new ArrayList<>();
-        for(int i = 1; i <= planilha.size() - 1; i++){
 
-            // "????????????" -> Caso o logradouro não possua endereço será associado está informação que está registrada no banco
-            String nomeBairro = Objects.isNull(planilha.get(i).get(11)) ? "????????????" : planilha.get(i).get(11).toString();
-            Integer idBairro = bairros.stream().filter(x -> x.getNome().equalsIgnoreCase(nomeBairro))
-                                                  .map(Bairro::getIdBairro)
-                                                  .findFirst()
-                                                  .orElse(0);
+        // vai permitir a inserção em lotes
+        String instrucaoSql = "INSERT INTO Logradouro (nome, numero, latitude, longitude, fkBairro) VALUES(?, ?, ?, ?, ?)";
+        PreparedStatement prepararLote = ctx.prepareStatement(instrucaoSql);
+
+        for(int i = 1; i <= planilha.size() - 1; i++){
 
             // 12 -> coluna com o valor do endereço
             String endereco = Objects.isNull(planilha.get(i).get(12)) ? "Não Informado" : planilha.get(i).get(12).toString();
@@ -52,28 +61,60 @@ public class ManipularDados {
             // 13 -> coluna com o valor do numero do endereço
             String numero = Objects.isNull(planilha.get(i).get(13)) ? "0" : planilha.get(i).get(13).toString();
 
-            // 14 -> coluna com o valor latitude
-            String vlLatitude = planilha.get(i).get(14).toString().replace(",", ".");
-            Double latitude = Objects.isNull(planilha.get(i).get(14)) || vlLatitude.equalsIgnoreCase("NULL") ? 0.0 : Double.parseDouble(vlLatitude);
-
-            // 15 -> coluna com o valor longitude
-            String vlLongitude = planilha.get(i).get(15).toString().replace(",", ".");
-            Double longitude = Objects.isNull(planilha.get(i).get(15)) || vlLongitude.equalsIgnoreCase("NULL") ? 0.0 : Double.parseDouble(vlLongitude);
-
             // Verifica se a rua com mesmo nome e numero já esta adicionada, se sim, irá pular essa inserção no banco de dados
             Boolean temRua = ruasCadastradas.stream().anyMatch(x -> x.getNome().equalsIgnoreCase(endereco) && x.getNumero().equals(numero));
-            if(!temRua){
-                ruasCadastradas.add(new Logradouro(0, endereco, numero, 0));
-                Bd.cadastrarLogradourosBd(new Logradouro(endereco, numero, idBairro, latitude, longitude));
+            Boolean ruaJaCadastrada = logradouros.stream().anyMatch(x -> x.getNome().equalsIgnoreCase(endereco) && x.getNumero().equals(numero));
+
+            if(!temRua) {
+                if(!ruaJaCadastrada) {
+
+                    String nomeBairro = Objects.isNull(planilha.get(i).get(11)) ? "" : planilha.get(i).get(11).toString();
+                    Integer idBairro = bairros.stream().filter(x -> x.getNome().equalsIgnoreCase(nomeBairro))
+                            .map(Bairro::getIdBairro)
+                            .findFirst()
+                            .orElse(0);
+
+                    // 14 -> coluna com o valor latitude
+                    String vlLatitude = planilha.get(i).get(14).toString().replace(",", ".");
+                    Double latitude = Objects.isNull(planilha.get(i).get(14)) || vlLatitude.equalsIgnoreCase("NULL") ? 0.0 : Double.parseDouble(vlLatitude);
+
+                    // 15 -> coluna com o valor longitude
+                    String vlLongitude = planilha.get(i).get(15).toString().replace(",", ".");
+                    Double longitude = Objects.isNull(planilha.get(i).get(15)) || vlLongitude.equalsIgnoreCase("NULL") ? 0.0 : Double.parseDouble(vlLongitude);
+
+                    // adicionar nessa lista evita dele fica lendo o mesmo registro
+                    ruasCadastradas.add(new Logradouro(0, endereco, numero, 0));
+
+                    prepararLote.setString(1, endereco);
+                    prepararLote.setString(2, numero);
+                    prepararLote.setDouble(3, latitude);
+                    prepararLote.setDouble(4, longitude);
+                    if (idBairro == 0) {
+                        prepararLote.setNull(5, java.sql.Types.INTEGER);
+                    } else {
+                        prepararLote.setInt(5, idBairro);
+                    }
+                    prepararLote.addBatch();
+
+                    // inseri a cada 5 mil registros
+                    if (ruasCadastradas.size() % 5000 == 0) {
+                        prepararLote.executeBatch();
+                        ctx.commit();
+                    }
+                }
             }
 
             System.out.println("Quantidade lida: " + i);
         }
 
+        // salva o restante dos dados
+        prepararLote.executeBatch();
+        ctx.commit();
         new GerarLog("ExtrairLogradouro", "Finalizando extração das informações");
+
     }
 
-    public static void extrairLocais(List<List<Object>> planilha) throws IOException {
+    public static void extrairLocais(List<List<Object>> planilha) tthrows IOException, SQLException {
 
         new GerarLog("extrairLocais", "Iniciando extração das informações");
         List<String> Locais = new ArrayList<>();
@@ -100,9 +141,9 @@ public class ManipularDados {
         new GerarLog("extrairLocais", "Finalizando extração das informações");
         Bd.cadastrarLocaisBd(Locais);
     }
-}
 
-public static void extrairCrimes(List<List<Object>> planilha) throws IOException {
+
+public static void extrairCrimes(List<List<Object>> planilha) throws IOException, SQLException {
 
     new GerarLog("extrairCrimes", "Iniciando extração das informações");
 

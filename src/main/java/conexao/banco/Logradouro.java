@@ -18,21 +18,18 @@ public class Logradouro {
         this.fkBairro = fkBairro;
     }
 
-    public Logradouro(String endereco, String numero, Integer idBairro, Double latitude, Double longitude) {
-        this.endereco = endereco;
+    public Logradouro(String nome, String numero, Integer fkBairro, Double latitude, Double longitude) {
+        this.nome = nome;
         this.numero = numero;
+        this.fkBairro = fkBairro;
         this.latitude = latitude;
         this.longitude = longitude;
-
     }
 
     public Integer getIdLogradouro() {
         return idLogradouro;
     }
 
-    public void setIdLogradouro(Integer idLogradouro) {
-        this.idLogradouro = idLogradouro;
-    }
 
     public String getNome() {
         return nome;
