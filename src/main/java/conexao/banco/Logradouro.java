@@ -1,6 +1,7 @@
 package conexao.banco;
 
 public class Logradouro {
+    private String endereco;
     private Integer idLogradouro;
     private String nome;
     private String numero;

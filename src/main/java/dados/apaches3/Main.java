@@ -33,6 +33,9 @@ public class Main {
         ManipularDados manipular = new ManipularDados();
         manipular.extrairBairros(planilha);
         manipular.extrairLogradouro(planilha);
+        manipular.extrairCrimes(planilha);
+        manipular.extrairLocais(planilha);
+
     }
 
     public static void listarBuckets(S3Client s3Client){

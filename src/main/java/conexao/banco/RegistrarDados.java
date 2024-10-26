@@ -15,11 +15,13 @@ public class RegistrarDados {
     static Conexao provedorBd = new Conexao();
     static JdbcTemplate connection = provedorBd.getConexaoDoBanco();
 
-    public static void cadastrarBairrosBd(List<String> bairros) throws IOException {
+    public static void cadastrarBairrosBd(List<String> bairros) throws IOException, SQLException {
 
         new GerarLog("cadastrarBairrosBd", "Iniciando inserção dos registros");
 
-        String instrucaoSql = "INSERT INTO bairro(nome) VALUES";
+        conexao.setAutoCommit(true);
+
+      String instrucaoSql = "INSERT INTO bairro(nome) VALUES";
         for (int i = 0; i < bairros.size(); i++){
 
             String bairro = bairros.get(i).replace("\"", "").replace("\\", "").replace("=", "");
@@ -35,7 +37,25 @@ public class RegistrarDados {
         connection.execute(instrucaoSql);
         new GerarLog("cadastrarBairrosBd", "Finalizando inserção dos registros");
     }
-    public static void cadastrarLogradourosBd(Logradouro rua) throws IOException {
+    
+    public static void cadastrarLocaisBd(List<String> locais) throws IOException, SQLException {
+
+        new GerarLog("cadastrarLocaisBd", "Iniciando inserção dos registros");
+
+        conexao.setAutoCommit(true);
+      
+        String instrucaoSql = "INSERT INTO local(nome) VALUES";
+        for (int i = 0; i < locais.size(); i++){
+
+            String local = locais.get(i).replace("\"", "").replace("\\", "").replace("=", "");
+            if((i + 1) == locais.size()){
+                instrucaoSql += """
+                    \n (\"%s\"); """.formatted(local);
+            } else{
+                instrucaoSql += """
+                    \n (\"%s\"), """.formatted(local);
+            }
+        }
 
         String endereco = rua.getNome().replace("\"", "").replace("\\", "").replace("=", "");
         String instrucaoSql = """
@@ -45,11 +65,27 @@ public class RegistrarDados {
     }
 
     // Funcionalidades de consulta
-    public static List<Bairro> consutarBairros(){
+    public static List<Bairro> consultarBairros(){
 
         List<Bairro> bairro = connection.query("SELECT * FROM bairro",
-                new BeanPropertyRowMapper<>(Bairro.class));
+                    new BeanPropertyRowMapper<>(Bairro.class));
 
         return bairro;
+    }
+
+    public static List<Local> consultarLocais(){
+
+        List<Local> local = connection.query("SELECT * FROM local",
+                new BeanPropertyRowMapper<>(Local.class));
+
+        return local;
+    }
+
+    public static List<Logradouro> consultarLogradouros(){
+
+        List<Logradouro> logradouros = connection.query("SELECT * FROM logradouro",
+                new BeanPropertyRowMapper<>(Logradouro.class));
+
+        return logradouros;
     }
 }
