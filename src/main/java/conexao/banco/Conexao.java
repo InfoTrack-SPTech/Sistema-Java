@@ -5,7 +5,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 public class Conexao {
 
     private JdbcTemplate conexaoDoBanco;
-
+    private  Connection conexao;
+    
     public Conexao(){
         BasicDataSource dataSource = new BasicDataSource();
         dataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
@@ -15,7 +16,14 @@ public class Conexao {
 
         conexaoDoBanco = new JdbcTemplate(dataSource);
     }
+    
+    public Connection getConexao() throws SQLException {
+        this.conexao = getConexaoDoBanco().getDataSource().getConnection();
+        conexao.setAutoCommit(false);
 
+        return conexao;
+    }
+    
     public JdbcTemplate getConexaoDoBanco() {
         return conexaoDoBanco;
     }
