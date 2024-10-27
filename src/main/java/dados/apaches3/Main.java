@@ -28,7 +28,7 @@ public class Main {
             baixarObjetosBucket(s3Client, listObj);
         }
 
-        List<List<Object>> planilha = LeitorExcel.extrairDadosPlanilha("./src/main/java/dados/apaches3/arquivos/SPDadosCriminais_2024.xlsx");
+        List<List<Object>> planilha = LeitorExcel.extrairDadosPlanilha("./arquivos/SPDadosCriminais_2024.xlsx");
 
         ManipularDados manipular = new ManipularDados();
         manipular.extrairBairros(planilha);
@@ -61,7 +61,7 @@ public class Main {
     public static void baixarObjetosBucket(S3Client s3Client, ListObjectsRequest listObjects) throws IOException {
 
         List<S3Object> objects = s3Client.listObjects(listObjects).contents();
-        String caminho = "./src/main/java/dados/apaches3/arquivos";
+        String caminho = "./arquivos";
 
         if(baixarConteudo){
             List<S3Object> arquivoDadosCriminais = s3Client.listObjects(listObjects).contents();
