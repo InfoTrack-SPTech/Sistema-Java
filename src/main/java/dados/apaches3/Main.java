@@ -1,6 +1,7 @@
 package dados.apaches3;
 
 import conexao.banco.*;
+import log.datas.GerarLog;
 import software.amazon.awssdk.core.sync.ResponseTransformer;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
@@ -16,16 +17,16 @@ import java.util.List;
 public class Main {
 
     // se estiver true irá baixar todos os arquivos do bucket
-    static Boolean baixarConteudo = false;
+    static Boolean baixarConteudo = true;
 
     public static void main(String[] args) throws Exception {
 
-//        S3Client s3Client = new S3Provider().getS3Client();
-//        listarBuckets(s3Client);
-//        ListObjectsRequest listObj = listarObjetosBucket(s3Client);
-//        if(baixarConteudo){
-//            baixarObjetosBucket(s3Client, listObj);
-//        }
+        S3Client s3Client = new S3Provider().getS3Client();
+        listarBuckets(s3Client);
+        ListObjectsRequest listObj = listarObjetosBucket(s3Client);
+        if(baixarConteudo){
+            baixarObjetosBucket(s3Client, listObj);
+        }
 
         List<List<Object>> planilha = LeitorExcel.extrairDadosPlanilha("./src/main/java/dados/apaches3/arquivos/SPDadosCriminais_2024.xlsx");
 

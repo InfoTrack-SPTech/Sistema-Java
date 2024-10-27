@@ -23,7 +23,7 @@ public class GerarLog extends FileWriter {
         try {
             // Caminho do arquivo de log
             File logFile = new File("""
-                    ./src/main/java/log/datas/logs/%s.txt""".formatted(nomeMetodo));
+                    ./logs/%s.txt""".formatted(nomeMetodo));
 
             // Cria uma instância de arquivoLog, com append = true (adiciona no final do arquivo)
             GerarLog arquivoLog = new GerarLog(logFile, true);
