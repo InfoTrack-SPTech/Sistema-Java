@@ -4,8 +4,10 @@ import conexao.banco.Bairro;
 import conexao.banco.Local;
 import conexao.banco.Logradouro;
 
+import java.sql.Time;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -24,14 +26,21 @@ public class ManipularDadosUtils {
         return informacao;
     }
 
-    public String tranformarPadraoDataAnoMesDia(Object valor) throws ParseException {
+    public String tranformarPadraoDataAnoMesDia(Object valorData, Object valorHorario) throws ParseException {
 
-        SimpleDateFormat formatoEntrada = new SimpleDateFormat("MM/dd/yyyy");
-        SimpleDateFormat formatoSaida = new SimpleDateFormat("yyyy-MM-dd"); // Formato desejado
-        String registroData = Objects.isNull(valor) ? "" : valor.toString();
+        SimpleDateFormat formatoEntradaData = new SimpleDateFormat("dd/MM/yyyy");
+        SimpleDateFormat formatoSaidaData = new SimpleDateFormat("yyyy-MM-dd"); // Formato desejado
 
-        Date data = formatoEntrada.parse(registroData);
-        return formatoSaida.format(data);
+        SimpleDateFormat formatoEntradaHora = new SimpleDateFormat("HH:mm:ss");
+        SimpleDateFormat formatoSaidaHora = new SimpleDateFormat("HH-mm-ss"); // Formato desejado
+
+        String registroData = Objects.isNull(valorData) ? "" : valorData.toString();
+        String registroHora = Objects.isNull(valorHorario) || valorHorario.toString().equalsIgnoreCase("NULL")? "00:00:00" : valorHorario.toString();
+
+        Date data = formatoEntradaData.parse(registroData);
+        Date hora = formatoEntradaHora.parse(registroHora);
+
+        return formatoSaidaData.format(data) + " " + formatoSaidaHora.format(hora);
     }
 
     public Integer validarConsultaLogradouroPorEnderecoENumero(List<Logradouro> logradouros, String end, String num){

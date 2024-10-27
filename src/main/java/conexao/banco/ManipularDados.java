@@ -75,27 +75,27 @@ public class ManipularDados {
             String chaveRua = endereco.toUpperCase() + "-" + numero;
             if(!logradouros.contains(chaveRua)) {
 
-                    String nomeBairro = conversor.validarValorTexto(planilha.get(i).get(11));
-                    Integer idBairro = conversor.validarConsultaBairroPorNome(bairros, nomeBairro);
+                String nomeBairro = conversor.validarValorTexto(planilha.get(i).get(11));
+                Integer idBairro = conversor.validarConsultaBairroPorNome(bairros, nomeBairro);
 
-                    // 14 -> coluna com o valor latitude
-                    String latitude = conversor.validarValorNumerico(planilha.get(i).get(14));
-                    // 15 -> coluna com o valor longitude
-                    String longitude = conversor.validarValorNumerico(planilha.get(i).get(15));
+                // 14 -> coluna com o valor latitude
+                String latitude = conversor.validarValorNumerico(planilha.get(i).get(14));
+                // 15 -> coluna com o valor longitude
+                String longitude = conversor.validarValorNumerico(planilha.get(i).get(15));
 
-                    logradouros.add(chaveRua);
+                logradouros.add(chaveRua);
 
-                    prepararLote.setString(1, endereco);
-                    prepararLote.setString(2, numero);
-                    prepararLote.setString(3, latitude);
-                    prepararLote.setString(4, longitude);
-                    if (idBairro == 0) {
-                        prepararLote.setNull(5, java.sql.Types.INTEGER);
-                    } else {
-                        prepararLote.setInt(5, idBairro);
-                    }
-                    prepararLote.addBatch();
-                System.out.println(latitude);
+                prepararLote.setString(1, endereco);
+                prepararLote.setString(2, numero);
+                prepararLote.setString(3, latitude);
+                prepararLote.setString(4, longitude);
+                if (idBairro == 0) {
+                    prepararLote.setNull(5, java.sql.Types.INTEGER);
+                } else {
+                    prepararLote.setInt(5, idBairro);
+                }
+                prepararLote.addBatch();
+
                 // inseri a cada 5 mil registros
                 if (i % 5000 == 0) {
                     prepararLote.executeBatch();
@@ -160,7 +160,7 @@ public class ManipularDados {
         String instrucaoSql = "INSERT INTO Crime(natureza, dataOcorrencia, descricao, fkLogradouro, fkLocal) VALUES(?, ?, ?, ?, ?)";
         PreparedStatement prepararLote = ctx.prepareStatement(instrucaoSql);
 
-        for (int i = 1; i <= planilha.size() - 1; i++) {
+        for (int i = 1; i <= 20 - 1; i++) {
 
             // 22 -> coluna com o tipo de crime
             String natureza = conversor.validarValorTexto(planilha.get(i).get(22));
@@ -172,25 +172,21 @@ public class ManipularDados {
             if (tiposPermitidos.contains(natureza) || tiposPermitidos.contains(descricao)) {
 
                 // 7 -> coluna com a data da ocorrência
-                String dataOcorrencia = conversor.tranformarPadraoDataAnoMesDia(planilha.get(i).get(7));
+                String dataOcorrencia = conversor.tranformarPadraoDataAnoMesDia(planilha.get(i).get(7), planilha.get(i).get(8));
 
                 // 13 -> coluna com o valor do numero do endereço
                 String numero = conversor.validarValorNumerico(planilha.get(i).get(13));
 
                 String nomeLogradouro = conversor.validarValorTexto(planilha.get(i).get(12));
-                Integer idLogradouro = conversor.validarConsultaLogradouroPorEnderecoENumero(logradouros, nomeLogradouro, numero);
+                Integer idLogradouro = 0 /* conversor.validarConsultaLogradouroPorEnderecoENumero(logradouros, nomeLogradouro, numero) */ ;
 
                 String local = conversor.validarValorTexto(planilha.get(i).get(10));
-                Integer idLocal = locais.stream()
-                        .filter(x -> x.getNome().equalsIgnoreCase(local))
-                        .map(Local::getIdLocal)
-                        .findFirst()
-                        .orElse(0);
+                Integer idLocal = conversor.validarConsultaLocalPorNome(locais, local);
 
                 prepararLote.setString(1, natureza);
                 prepararLote.setString(2, dataOcorrencia);
                 prepararLote.setString(3, descricao);
-                if (idLogradouro == 0) {
+                if (true) { // ficará assim até eu resolver um bug relacionado ao idLogradouro
                     prepararLote.setNull(4, java.sql.Types.INTEGER);
                 } else {
                     prepararLote.setInt(4, idLogradouro);

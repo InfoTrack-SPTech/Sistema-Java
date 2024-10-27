@@ -27,21 +27,13 @@ public class Main {
 //            baixarObjetosBucket(s3Client, listObj);
 //        }
 
-//        List<List<Object>> planilha = LeitorExcel.extrairDadosPlanilha("./src/main/java/dados/apaches3/arquivos/SPDadosCriminais_2024.xlsx");
+        List<List<Object>> planilha = LeitorExcel.extrairDadosPlanilha("./src/main/java/dados/apaches3/arquivos/SPDadosCriminais_2024.xlsx");
 
-        RegistrarDados x = new RegistrarDados();
-        List<Bairro> z = x.consultarBairros();
-        List<Logradouro> q = x.consultarLogradouros();
-
-        System.out.println(z.get(16));
-        System.out.println(q.get(1));
-
-//        ManipularDados manipular = new ManipularDados();
-//        manipular.extrairBairros(planilha);
-//        manipular.extrairLocais(planilha);
-//        manipular.extrairLogradouro(planilha);
-//        manipular.extrairCrimes(planilha);
-
+        ManipularDados manipular = new ManipularDados();
+        manipular.extrairBairros(planilha);
+        manipular.extrairLocais(planilha);
+        manipular.extrairLogradouro(planilha);
+        // manipular.extrairCrimes(planilha);
     }
 
     public static void listarBuckets(S3Client s3Client){
