@@ -7,7 +7,9 @@ import conexao.banco.Logradouro;
 import java.sql.Time;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -29,33 +31,36 @@ public class ManipularDadosUtils {
     public String tranformarPadraoDataAnoMesDia(Object valorData, Object valorHorario) throws ParseException {
 
         SimpleDateFormat formatoEntradaData = new SimpleDateFormat("dd/MM/yyyy");
-        SimpleDateFormat formatoSaidaData = new SimpleDateFormat("yyyy-MM-dd"); // Formato desejado
-
         SimpleDateFormat formatoEntradaHora = new SimpleDateFormat("HH:mm:ss");
-        SimpleDateFormat formatoSaidaHora = new SimpleDateFormat("HH-mm-ss"); // Formato desejado
 
         String registroData = Objects.isNull(valorData) ? "" : valorData.toString();
         String registroHora = Objects.isNull(valorHorario) || valorHorario.toString().equalsIgnoreCase("NULL")? "00:00:00" : valorHorario.toString();
 
-        Date data = formatoEntradaData.parse(registroData);
-        Date hora = formatoEntradaHora.parse(registroHora);
+        Calendar calendarioData = Calendar.getInstance();
+        calendarioData.setTime(formatoEntradaData.parse(registroData));
+        Integer dia = calendarioData.get(Calendar.DAY_OF_MONTH);
+        Integer mes = calendarioData.get(Calendar.MONTH) + 1; // Janeiro começa no 0, por isso é adicionado 1
+        Integer ano = calendarioData.get(Calendar.YEAR);
+        String modeloDataDesejado = """
+                %s-%s-%s""".formatted(ano, mes, dia);
 
-        return formatoSaidaData.format(data) + " " + formatoSaidaHora.format(hora);
+        Calendar calendarioHora = Calendar.getInstance();
+        calendarioHora.setTime(formatoEntradaHora.parse(registroHora));
+        Integer horas = calendarioHora.get(Calendar.HOUR_OF_DAY);
+        Integer minutos = calendarioHora.get(Calendar.MINUTE);
+        Integer segundos = calendarioHora.get(Calendar.SECOND);
+        String modeloHoraDesejado = """
+                %s:%s:%s""".formatted(horas, minutos, segundos);
+
+        return modeloDataDesejado + " " + modeloHoraDesejado;
     }
 
     public Integer validarConsultaLogradouroPorEnderecoENumero(List<Logradouro> logradouros, String end, String num){
-
-        System.out.println(logradouros.get(2));
-        System.out.println(end);
-        System.out.println(num);
 
         Integer res = logradouros.stream()
                                     .filter(x -> x.getNome().equalsIgnoreCase(end))
                                     .map(Logradouro::getIdLogradouro)
                                     .findFirst().orElse(null);
-
-        System.out.println("idadsf");
-        System.out.println(res);
 
         return res == null ? 0 : res;
     }
