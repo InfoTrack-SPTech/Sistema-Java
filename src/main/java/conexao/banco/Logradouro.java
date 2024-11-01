@@ -9,15 +9,8 @@ public class Logradouro {
     private String latitude;
     private String longitude;
 
-    public Logradouro() {}
-
-    public Logradouro(Integer idLogradouro, String nome, String numero, Integer fkBairro, String latitude, String longitude) {
+    public void setIdLogradouro(Integer idLogradouro) {
         this.idLogradouro = idLogradouro;
-        this.nome = nome;
-        this.numero = numero;
-        this.fkBairro = fkBairro;
-        this.latitude = latitude;
-        this.longitude = longitude;
     }
 
     public Integer getIdLogradouro() {
@@ -66,11 +59,13 @@ public class Logradouro {
 
     @Override
     public String toString() {
-        return "\nLogradouro {" +
-                "idLogradouro = " + idLogradouro +
-                ", nome = '" + nome + '\'' +
-                ", numero = '" + numero + '\'' +
-                ", fkBairro = " + fkBairro +
+        return "Logradouro{" +
+                "idLogradouro=" + idLogradouro +
+                ", nome='" + nome + '\'' +
+                ", numero='" + numero + '\'' +
+                ", latitude='" + latitude + '\'' +
+                ", longitude='" + longitude + '\'' +
+                ", fkBairro=" + fkBairro +
                 '}';
     }
 }
