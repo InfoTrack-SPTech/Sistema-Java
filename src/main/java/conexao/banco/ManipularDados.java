@@ -1,6 +1,7 @@
 package conexao.banco;
 
 import log.datas.GerarLog;
+import log.datas.S3Logs;
 import org.apache.commons.dbcp2.Utils;
 import software.amazon.awssdk.services.s3.endpoints.internal.Value;
 import utils.ManipularDadosUtils;
@@ -38,21 +39,22 @@ public class ManipularDados {
         new GerarLog("extrairBairros", "Iniciando extração das informações");
 
         List<String> Bairros = new ArrayList<>();
-        for (int item = 1; item <= planilha.size() - 1; item++) {
+        for (int item = 1; item <= planilha.size(); item++) {
 
             // 11 -> coluna onde possui os valores das celulas dos bairros
             String bairro = conversor.validarValorTexto(planilha.get(item).get(11));
             Boolean jaExtraido = Bairros.stream().anyMatch(x -> x.equalsIgnoreCase(bairro));
             if (!jaExtraido && bairro.length() > 0) {
                 Bairros.add(bairro);
-                if(item % 50000 == 0){
-                    System.out.println("Quantidade lida: " + item);
-                    new GerarLog("extrairBairros", "Inserindo 50 mil registros...");
-                }
+            }
+            if(item % 50000 == 0){
+                System.out.println("Quantidade lida: " + item);
+                new GerarLog("extrairBairros", "Inserindo 50 mil registros...");
             }
         }
 
         new GerarLog("extrairBairros", "Finalizando extração das informações");
+        S3Logs.subirArquivoBucket("extrairBairros");
         Bd.cadastrarBairrosBd(Bairros, ctx);
     }
 
@@ -73,7 +75,7 @@ public class ManipularDados {
         String instrucaoSql = "INSERT INTO Logradouro (nome, numero, latitude, longitude, fkBairro) VALUES(?, ?, ?, ?, ?)";
         PreparedStatement prepararLote = ctx.prepareStatement(instrucaoSql);
 
-        for(int i = 1; i <= planilha.size() - 1; i++){
+        for(int i = 1; i <= planilha.size(); i++){
 
             // 12 -> coluna com o valor do endereço
             String endereco = conversor.validarValorTexto(planilha.get(i).get(12));
@@ -120,8 +122,8 @@ public class ManipularDados {
         // salva o restante dos dados
         prepararLote.executeBatch();
         ctx.commit();
-        new GerarLog("ExtrairLogradouro", "Finalizando extração das informações");
-
+        new GerarLog("extrairLogradouro", "Finalizando extração das informações");
+        S3Logs.subirArquivoBucket("extrairLogradouro");
     }
 
     public static void extrairLocais(List<List<Object>> planilha) throws IOException, SQLException {
@@ -139,7 +141,7 @@ public class ManipularDados {
                 "Facebook", "Whatsapp", "Instagram", "Lago/Lagoa", "Mar Territorial", "Margem Direita de Rio", "Margem Esquerda de Rio",
                 "Praia/Balneário", "Pela Internet", "Rodovia/Estrada", "Outros", "NULL"
         ));
-        for (int item = 1; item <= planilha.size() - 1; item++) {
+        for (int item = 1; item <= planilha.size(); item++) {
 
             // 10 -> coluna onde possui os valores das celulas dos locais
             String local = conversor.validarValorTexto(planilha.get(item).get(10));
@@ -157,6 +159,7 @@ public class ManipularDados {
             }
         }
         new GerarLog("extrairLocais", "Finalizando extração das informações");
+        S3Logs.subirArquivoBucket("extrairLocais");
         Bd.cadastrarLocaisBd(locais, ctx);
     }
 
@@ -176,7 +179,7 @@ public class ManipularDados {
         String instrucaoSql = "INSERT INTO Crime(natureza, dataOcorrencia, descricao, fkLogradouro, fkLocal) VALUES(?, ?, ?, ?, ?)";
         PreparedStatement prepararLote = ctx.prepareStatement(instrucaoSql);
 
-        for (int i = 1; i <= planilha.size() - 1; i++) {
+        for (int i = 1; i <= planilha.size(); i++) {
 
             // 22 -> coluna com o tipo de crime
             String natureza = conversor.validarValorTexto(planilha.get(i).get(22));
@@ -231,5 +234,6 @@ public class ManipularDados {
         ctx.commit();
 
         new GerarLog("extrairCrimes", "Finalizando extração das informações");
+        S3Logs.subirArquivoBucket("extrairCrimes");
     }
 }
