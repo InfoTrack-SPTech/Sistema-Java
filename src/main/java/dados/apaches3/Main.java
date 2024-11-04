@@ -39,7 +39,7 @@ public class Main {
             baixarObjetosBucket(s3Client, listObj);
         }
 
-        System.out.println("Iniciando Leitura");
+        System.out.println("Iniciando Leitura...");
         List<List<Object>> planilha = LeitorExcel.extrairDadosPlanilha("./arquivos/SPDadosCriminais_2024.xlsx");
 
         ManipularDados manipular = new ManipularDados();
