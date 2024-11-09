@@ -23,7 +23,7 @@ import java.util.UUID;
 public class Main {
 
     // se estiver true irá baixar todos os arquivos do bucket
-    static Boolean baixarConteudo = false;
+    static Boolean baixarConteudo = true;
     static Conexao conectarBd;
 
     static {
