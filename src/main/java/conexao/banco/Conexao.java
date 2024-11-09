@@ -94,7 +94,7 @@ public class Conexao {
         conectarBd.execute("""
             CREATE TABLE IF NOT EXISTS Cargo (
                 idCargo INT AUTO_INCREMENT PRIMARY KEY,
-                nome VARCHAR(50) CONSTRAINT chk_nome CHECK (nome IN ('Analista', 'Gerente', 'Administrador'))
+                nome VARCHAR(50)
             );
         """);
 
@@ -165,6 +165,18 @@ public class Conexao {
             INSERT INTO Usuario (email, nome, senha, telefone, fkCargo, fkEmpresa)
             SELECT 'cintiaOhara@infotrack.com', 'Cintia Ohara', 'Cintia50', '11999955555', 3, 1
             WHERE NOT EXISTS (SELECT 1 FROM Usuario WHERE email = 'cintiaOhara@infotrack.com');
+        """);
+
+        conectarBd.execute("""
+            CREATE TABLE IF NOT EXISTS Recomendacao (
+                idRecomendacao INT PRIMARY KEY AUTO_INCREMENT,
+                fkEmpresa INT,
+                descricao TEXT,
+                tipoRecomendacao VARCHAR(50),
+                dataGeracao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                geradoPor VARCHAR(50) DEFAULT 'IA',
+                FOREIGN KEY (fkEmpresa) REFERENCES Empresa(idEmpresa)
+            );
         """);
     }
 }
