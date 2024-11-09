@@ -1,6 +1,7 @@
 package conexao.banco;
 
 import log.datas.GerarLog;
+import log.datas.S3Logs;
 import org.apache.poi.hpsf.Decimal;
 import org.apache.poi.ss.formula.functions.T;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -47,6 +48,7 @@ public class RegistrarDados {
 
         connection.execute(instrucaoSql);
         new GerarLog("cadastrarBairrosBd", "Finalizando inserção dos registros");
+        S3Logs.subirArquivoBucket("cadastrarBairrosBd");
     }
 
     public static void cadastrarLocaisBd(List<String> locais, Connection conexao) throws IOException, SQLException {
@@ -61,17 +63,20 @@ public class RegistrarDados {
             if((i + 1) == locais.size()){
                 instrucaoSql += """
                     \n (\"%s\"); """.formatted(local);
+                System.out.println(instrucaoSql);
             } else{
                 instrucaoSql += """
                     \n (\"%s\"), """.formatted(local);
+                System.out.println(instrucaoSql);
+
             }
         }
 
         connection.execute(instrucaoSql);
         new GerarLog("cadastrarLocaisBd", "Finalizando inserção dos registros");
+        S3Logs.subirArquivoBucket("cadastrarLocaisBd");
     }
 
-    // Funcionalidades de consulta
     public static List<Bairro> consultarBairros(){
 
         List<Bairro> bairro = connection.query("SELECT * FROM Bairro",

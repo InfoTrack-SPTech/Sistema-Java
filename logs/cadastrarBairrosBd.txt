@@ -1,7 +1,0 @@
-30/10/2024 16:54:36 - Iniciando inserção dos registros 
-30/10/2024 16:54:41 - Finalizando inserção dos registros 
-30/10/2024 20:39:35 - Iniciando inserção dos registros 
-30/10/2024 20:43:48 - Iniciando inserção dos registros 
-30/10/2024 20:43:52 - Finalizando inserção dos registros 
-30/10/2024 22:54:13 - Iniciando inserção dos registros 
-30/10/2024 22:54:22 - Finalizando inserção dos registros 
