@@ -37,25 +37,41 @@ public class ManipularDados {
 
         System.out.println("Iniciando extração dos Bairros");
         new GerarLog("extrairBairros", "Iniciando extração das informações");
+        ctx.setAutoCommit(false);
 
-        List<String> Bairros = new ArrayList<>();
-        for (int item = 1; item <= planilha.size(); item++) {
+        List<Bairro> bairros = Bd.consultarBairros();
+        HashSet<String> bairrosCadastrados = new HashSet<>();
+
+        // vai permitir a inserção em lotes
+        String instrucaoSql = "INSERT INTO Bairro(nome) VALUES (?)";
+        PreparedStatement prepararLote = ctx.prepareStatement(instrucaoSql);
+        for (int item = 1; item < planilha.size(); item++) {
 
             // 11 -> coluna onde possui os valores das celulas dos bairros
             String bairro = conversor.validarValorTexto(planilha.get(item).get(11));
-            Boolean jaExtraido = Bairros.stream().anyMatch(x -> x.equalsIgnoreCase(bairro));
-            if (!jaExtraido && bairro.length() > 0) {
-                Bairros.add(bairro);
+            Boolean jaExtraido = bairros.stream().anyMatch(x -> x.getNome().equalsIgnoreCase(bairro));
+            if (!jaExtraido && !bairrosCadastrados.contains(bairro)) {
+                bairrosCadastrados.add(bairro);
+
+                prepararLote.setString(1, bairro);
+                prepararLote.addBatch();
+            }
+            if(item % 5000 == 0){
+                prepararLote.executeBatch();
+                ctx.commit();
             }
             if(item % 50000 == 0){
                 System.out.println("Quantidade lida: " + item);
-                new GerarLog("extrairBairros", "Inserindo 50 mil registros...");
+                new GerarLog("extrairBairros", "Quantidade total lida: " + item);
             }
         }
 
+        // salva o restante dos dados
+        prepararLote.executeBatch();
+        ctx.commit();
+
         new GerarLog("extrairBairros", "Finalizando extração das informações");
         S3Logs.subirArquivoBucket("extrairBairros");
-        Bd.cadastrarBairrosBd(Bairros, ctx);
     }
 
     public static void extrairLogradouro(List<List<Object>> planilha) throws IOException, SQLException {
@@ -75,7 +91,7 @@ public class ManipularDados {
         String instrucaoSql = "INSERT INTO Logradouro (nome, numero, latitude, longitude, fkBairro) VALUES(?, ?, ?, ?, ?)";
         PreparedStatement prepararLote = ctx.prepareStatement(instrucaoSql);
 
-        for(int i = 1; i <= planilha.size(); i++){
+        for(int i = 1; i < planilha.size(); i++){
 
             // 12 -> coluna com o valor do endereço
             String endereco = conversor.validarValorTexto(planilha.get(i).get(12));
@@ -107,21 +123,22 @@ public class ManipularDados {
                 }
                 prepararLote.addBatch();
 
-                // inseri a cada 5 mil registros
-                if (i % 5000 == 0) {
-                    prepararLote.executeBatch();
-                    ctx.commit();
-                }
-                if(i % 50000 == 0){
-                    System.out.println("Quantidade lida: " + i);
-                    new GerarLog("extrairLogradouro", "Inserindo 50 mil registros...");
-                }
+            }
+            // inseri a cada 5 mil registros
+            if (i % 5000 == 0) {
+                prepararLote.executeBatch();
+                ctx.commit();
+            }
+            if(i % 50000 == 0){
+                System.out.println("Quantidade lida: " + i);
+                new GerarLog("extrairLogradouro", "Quantidade total lida: " + i);
             }
         }
 
         // salva o restante dos dados
         prepararLote.executeBatch();
         ctx.commit();
+
         new GerarLog("extrairLogradouro", "Finalizando extração das informações");
         S3Logs.subirArquivoBucket("extrairLogradouro");
     }
@@ -130,9 +147,10 @@ public class ManipularDados {
 
         System.out.println("Iniciando extração dos Locais");
         new GerarLog("extrairLocais", "Iniciando extração das informações");
+        ctx.setAutoCommit(false);
 
-        List<String> locais = new ArrayList<>();
         List<Local> locaisJaCadastrados = Bd.consultarLocais();
+        HashSet<String> locais = new HashSet<>();
 
         // Define os tipos de estabelecimentos permitidos
         Set<String> tiposNaoPermitidos = new HashSet<>(Arrays.asList(
@@ -141,7 +159,11 @@ public class ManipularDados {
                 "Facebook", "Whatsapp", "Instagram", "Lago/Lagoa", "Mar Territorial", "Margem Direita de Rio", "Margem Esquerda de Rio",
                 "Praia/Balneário", "Pela Internet", "Rodovia/Estrada", "Outros", "NULL"
         ));
-        for (int item = 1; item <= planilha.size(); item++) {
+
+        // vai permitir a inserção em lotes
+        String instrucaoSql = "INSERT INTO Local(nome) VALUES (?)";
+        PreparedStatement prepararLote = ctx.prepareStatement(instrucaoSql);
+        for (int item = 1; item < planilha.size(); item++) {
 
             // 10 -> coluna onde possui os valores das celulas dos locais
             String local = conversor.validarValorTexto(planilha.get(item).get(10));
@@ -151,16 +173,27 @@ public class ManipularDados {
             if(!jaExisteLocal){
                 if(!locais.contains(local) && !tiposNaoPermitidos.contains(local)){
                     locais.add(local);
+
+                    prepararLote.setString(1, local);
+                    prepararLote.addBatch();
                 }
+            }
+            if(item % 5000 == 0){
+                prepararLote.executeBatch();
+                ctx.commit();
             }
             if(item % 50000 == 0){
                 System.out.println("Quantidade lida: " + item);
-                new GerarLog("extrairLocais", "Inserindo 50 mil registros...");
+                new GerarLog("extrairLocais", "Quantidade total lida: " + item);
             }
         }
+
+        // salva o restante dos dados
+        prepararLote.executeBatch();
+        ctx.commit();
+
         new GerarLog("extrairLocais", "Finalizando extração das informações");
         S3Logs.subirArquivoBucket("extrairLocais");
-        Bd.cadastrarLocaisBd(locais, ctx);
     }
 
     public static void extrairCrimes(List<List<Object>> planilha) throws IOException, SQLException, ParseException {
@@ -173,13 +206,13 @@ public class ManipularDados {
         List<Logradouro> logradouros = Bd.consultarLogradouros();
         List<Local> locais = Bd.consultarLocais();
 
-        List<String> tiposPermitidos = new ArrayList<>(List.of("FURTO", "ROUBO", "Furto", "Roubo", "Furto de coisa comum"));
+        HashSet<String> tiposPermitidos = new HashSet<>(List.of("FURTO", "ROUBO", "Furto", "Roubo", "Furto de coisa comum"));
 
         // vai permitir a inserção em lotes
         String instrucaoSql = "INSERT INTO Crime(natureza, dataOcorrencia, descricao, fkLogradouro, fkLocal) VALUES(?, ?, ?, ?, ?)";
         PreparedStatement prepararLote = ctx.prepareStatement(instrucaoSql);
 
-        for (int i = 1; i <= planilha.size(); i++) {
+        for (int i = 1; i < planilha.size(); i++) {
 
             // 22 -> coluna com o tipo de crime
             String natureza = conversor.validarValorTexto(planilha.get(i).get(22));
@@ -216,16 +249,15 @@ public class ManipularDados {
                     prepararLote.setInt(5, idLocal);
                 }
                 prepararLote.addBatch();
-
-                // inseri a cada 5000 mil registros
-                if(i % 5000 == 0){
-                    prepararLote.executeBatch();
-                    ctx.commit();
-                }
-                if(i % 50000 == 0){
-                    System.out.println("Quantidade lida " + i);
-                    new GerarLog("extrairCrimes", "Inserindo 50 mil registros...");
-                }
+            }
+            // inseri a cada 5000 mil registros
+            if(i % 5000 == 0){
+                prepararLote.executeBatch();
+                ctx.commit();
+            }
+            if(i % 50000 == 0){
+                System.out.println("Quantidade lida " + i);
+                new GerarLog("extrairCrimes", "Quantidade total lida: " + i);
             }
         }
 

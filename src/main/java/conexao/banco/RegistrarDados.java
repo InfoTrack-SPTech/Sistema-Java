@@ -77,7 +77,6 @@ public class RegistrarDados {
         S3Logs.subirArquivoBucket("cadastrarLocaisBd");
     }
 
-    // Funcionalidades de consulta
     public static List<Bairro> consultarBairros(){
 
         List<Bairro> bairro = connection.query("SELECT * FROM Bairro",
