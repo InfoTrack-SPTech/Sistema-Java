@@ -28,55 +28,6 @@ public class RegistrarDados {
 
     static JdbcTemplate connection = provedorBd.getConexaoDoBanco();
 
-    public static void cadastrarBairrosBd(List<String> bairros, Connection conexao) throws IOException, SQLException {
-
-        new GerarLog("cadastrarBairrosBd", "Iniciando inserção dos registros");
-        conexao.setAutoCommit(true);
-
-        String instrucaoSql = "INSERT INTO Bairro(nome) VALUES";
-        for (int i = 0; i < bairros.size(); i++){
-
-            String bairro = bairros.get(i).replace("\"", "").replace("\\", "").replace("=", "");
-            if((i + 1) == bairros.size()){
-                instrucaoSql += """
-                    \n (\"%s\"); """.formatted(bairro);
-            } else{
-                instrucaoSql += """
-                    \n (\"%s\"), """.formatted(bairro);
-            }
-        }
-
-        connection.execute(instrucaoSql);
-        new GerarLog("cadastrarBairrosBd", "Finalizando inserção dos registros");
-        S3Logs.subirArquivoBucket("cadastrarBairrosBd");
-    }
-
-    public static void cadastrarLocaisBd(List<String> locais, Connection conexao) throws IOException, SQLException {
-
-        new GerarLog("cadastrarLocaisBd", "Iniciando inserção dos registros");
-        conexao.setAutoCommit(true);
-
-        String instrucaoSql = "INSERT INTO Local(nome) VALUES";
-        for (int i = 0; i < locais.size(); i++){
-
-            String local = locais.get(i).replace("\"", "").replace("\\", "").replace("=", "");
-            if((i + 1) == locais.size()){
-                instrucaoSql += """
-                    \n (\"%s\"); """.formatted(local);
-                System.out.println(instrucaoSql);
-            } else{
-                instrucaoSql += """
-                    \n (\"%s\"), """.formatted(local);
-                System.out.println(instrucaoSql);
-
-            }
-        }
-
-        connection.execute(instrucaoSql);
-        new GerarLog("cadastrarLocaisBd", "Finalizando inserção dos registros");
-        S3Logs.subirArquivoBucket("cadastrarLocaisBd");
-    }
-
     public static List<Bairro> consultarBairros(){
 
         List<Bairro> bairro = connection.query("SELECT * FROM Bairro",
