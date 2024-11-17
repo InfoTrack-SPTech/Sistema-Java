@@ -1,6 +1,6 @@
 package conexao.banco;
 
-public class Crime {
+public class Crime extends Artigo{
     private Integer idCrime;
     private String natureza;
     private String dataOcorrencia;
@@ -8,9 +8,12 @@ public class Crime {
     private Integer fkLogradouro;
     private Integer fkLocal;
 
-    public Crime() {}
+    public Crime(String artigo) {
+        super(artigo);
+    }
 
-    public Crime(Integer idCrime, String natureza, String dataOcorrencia, String descricao, Integer fkLogradouro, Integer fkLocal) {
+    public Crime(Integer idCrime, String natureza, String dataOcorrencia, String descricao, Integer fkLogradouro, Integer fkLocal, String artigo) {
+        super(artigo);
         this.idCrime = idCrime;
         this.natureza = natureza;
         this.dataOcorrencia = dataOcorrencia;

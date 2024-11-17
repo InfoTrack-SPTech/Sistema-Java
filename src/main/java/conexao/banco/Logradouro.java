@@ -1,5 +1,7 @@
 package conexao.banco;
 
+import java.util.List;
+
 public class Logradouro {
 
     private Integer idLogradouro;
@@ -8,6 +10,7 @@ public class Logradouro {
     private Integer fkBairro;
     private String latitude;
     private String longitude;
+    private List<Crime> crimes;
 
     public void setIdLogradouro(Integer idLogradouro) {
         this.idLogradouro = idLogradouro;
