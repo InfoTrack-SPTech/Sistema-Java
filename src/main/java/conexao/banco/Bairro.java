@@ -1,8 +1,11 @@
 package conexao.banco;
 
+import java.util.List;
+
 public class Bairro {
     private Integer idBairro;
     private String nome;
+    private List<Logradouro> ruas;
 
     public Bairro() {}
 
