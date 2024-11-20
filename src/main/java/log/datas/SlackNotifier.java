@@ -7,7 +7,7 @@ import java.net.URL;
 public class SlackNotifier {
     public static void sendNotification(String message) {
         try {
-            String webhookUrl ="https://hooks.slack.com/services/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";
+            String webhookUrl ="";
             URL url = new URL(webhookUrl);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("POST");
@@ -30,9 +30,5 @@ public class SlackNotifier {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    public static void main(String[] args) {
-        sendNotification("Testando a notificação!");
     }
 }

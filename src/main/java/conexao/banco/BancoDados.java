@@ -1,20 +1,12 @@
 package conexao.banco;
 
-import log.datas.GerarLog;
-import log.datas.S3Logs;
-import org.apache.poi.hpsf.Decimal;
-import org.apache.poi.ss.formula.functions.T;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapperResultSetExtractor;
 
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 
-public class RegistrarDados {
+public class BancoDados {
 
     static Conexao provedorBd;
 
@@ -51,4 +43,13 @@ public class RegistrarDados {
 
         return logradouros;
     }
+
+    public static List<Crime> consultarCrimes(){
+
+        List<Crime> crimes = connection.query("SELECT * FROM Crime",
+                new BeanPropertyRowMapper<>(Crime.class));
+
+        return crimes;
+    }
+
 }

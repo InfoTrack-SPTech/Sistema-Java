@@ -24,3 +24,18 @@
 09/11/2024 16:26:15 - Quantidade total lida: 500000 
 09/11/2024 16:27:39 - Quantidade total lida: 550000 
 09/11/2024 16:29:08 - Finalizando extração das informações 
+20/11/2024 11:46:39 - Iniciando extração das informações 
+20/11/2024 12:01:05 - Iniciando extração das informações 
+20/11/2024 12:10:20 - Iniciando extração das informações 
+20/11/2024 12:10:49 - Quantidade total lida: 50000 
+20/11/2024 12:11:35 - Quantidade total lida: 100000 
+20/11/2024 12:12:25 - Quantidade total lida: 150000 
+20/11/2024 12:13:31 - Quantidade total lida: 200000 
+20/11/2024 12:14:42 - Quantidade total lida: 250000 
+20/11/2024 12:16:31 - Quantidade total lida: 300000 
+20/11/2024 12:17:55 - Quantidade total lida: 350000 
+20/11/2024 12:20:09 - Quantidade total lida: 400000 
+20/11/2024 12:21:52 - Quantidade total lida: 450000 
+20/11/2024 12:23:47 - Quantidade total lida: 500000 
+20/11/2024 12:25:36 - Quantidade total lida: 550000 
+20/11/2024 12:27:30 - Finalizando extração das informações (Quantidade total lida: 592404) 

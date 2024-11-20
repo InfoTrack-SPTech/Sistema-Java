@@ -2,8 +2,7 @@ package conexao.banco;
 
 import log.datas.GerarLog;
 import log.datas.S3Logs;
-import org.apache.commons.dbcp2.Utils;
-import software.amazon.awssdk.services.s3.endpoints.internal.Value;
+import log.datas.SlackNotifier;
 import utils.ManipularDadosUtils;
 
 import java.io.IOException;
@@ -11,14 +10,11 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.*;
 
 public class ManipularDados {
 
-    static RegistrarDados Bd = new RegistrarDados();
+    static BancoDados Bd = new BancoDados();
     static ManipularDadosUtils conversor = new ManipularDadosUtils();
     static Connection ctx;
 
@@ -37,6 +33,7 @@ public class ManipularDados {
 
         System.out.println("Iniciando extração dos Bairros");
         new GerarLog("extrairBairros", "Iniciando extração das informações");
+        SlackNotifier.sendNotification("Atualizando base de dados dos Bairros...");
         ctx.setAutoCommit(false);
 
         List<Bairro> bairros = Bd.consultarBairros();
@@ -70,7 +67,8 @@ public class ManipularDados {
         prepararLote.executeBatch();
         ctx.commit();
 
-        new GerarLog("extrairBairros", "Finalizando extração das informações");
+        SlackNotifier.sendNotification("Atualização da base dos Bairros finalizada...");
+        new GerarLog("extrairBairros", "Finalizando extração das informações (Quantidade total lida: " + planilha.size() + ")");
         S3Logs.subirArquivoBucket("extrairBairros");
     }
 
@@ -78,14 +76,15 @@ public class ManipularDados {
 
         System.out.println("Iniciando extração dos Logradouros");
         new GerarLog("extrairLogradouro", "Iniciando extração das informações");
+        SlackNotifier.sendNotification("Atualizando base de dados dos Logradouros...");
         ctx.setAutoCommit(false);
 
         List<Bairro> bairros = Bd.consultarBairros();
         List<Logradouro> ruasJaCadastradas = Bd.consultarLogradouros();
+        bairros = conversor.associarRuasAoBairro(ruasJaCadastradas, bairros);
 
-        List<String> logradouros = new ArrayList<>();
-        ruasJaCadastradas.forEach(r -> logradouros.add(r.getNome().toUpperCase() + "-" + r.getNumero()));
-        HashSet<String> lista= new HashSet<>(logradouros);
+        HashSet<String> lista= new HashSet<>();
+        bairros.forEach(b -> b.getRuas().forEach(r -> lista.add(r.getNome().toUpperCase() + "-" + r.getNumero())));
 
         // vai permitir a inserção em lotes
         String instrucaoSql = "INSERT INTO Logradouro (nome, numero, latitude, longitude, fkBairro) VALUES(?, ?, ?, ?, ?)";
@@ -139,7 +138,8 @@ public class ManipularDados {
         prepararLote.executeBatch();
         ctx.commit();
 
-        new GerarLog("extrairLogradouro", "Finalizando extração das informações");
+        SlackNotifier.sendNotification("Atualização da base dos Logradouros finalizada...");
+        new GerarLog("extrairLogradouro", "Finalizando extração das informações (Quantidade total lida: " + planilha.size() + ")");
         S3Logs.subirArquivoBucket("extrairLogradouro");
     }
 
@@ -147,6 +147,7 @@ public class ManipularDados {
 
         System.out.println("Iniciando extração dos Locais");
         new GerarLog("extrairLocais", "Iniciando extração das informações");
+        SlackNotifier.sendNotification("Atualizando base de dados dos Locais...");
         ctx.setAutoCommit(false);
 
         List<Local> locaisJaCadastrados = Bd.consultarLocais();
@@ -192,7 +193,8 @@ public class ManipularDados {
         prepararLote.executeBatch();
         ctx.commit();
 
-        new GerarLog("extrairLocais", "Finalizando extração das informações");
+        SlackNotifier.sendNotification("Atualização da base dos Locais finalizada...");
+        new GerarLog("extrairLocais", "Finalizando extração das informações (Quantidade total lida: " + planilha.size() + ")");
         S3Logs.subirArquivoBucket("extrairLocais");
     }
 
@@ -200,16 +202,19 @@ public class ManipularDados {
 
         System.out.println("Iniciando extração dos Crimes");
         new GerarLog("extrairCrimes", "Iniciando extração das informações");
+        SlackNotifier.sendNotification("Atualizando base de dados dos Crimes...");
         ctx.setAutoCommit(false);
 
         // Faz uma consulta no banco para pegar as informacoes cadastradas
-        List<Logradouro> logradouros = Bd.consultarLogradouros();
         List<Local> locais = Bd.consultarLocais();
+        List<Logradouro> logradouros = Bd.consultarLogradouros();
+        List<Crime> crimes = Bd.consultarCrimes();
 
+        logradouros = conversor.associarCrimesAoLogradouro(logradouros, crimes);
         HashSet<String> tiposPermitidos = new HashSet<>(List.of("FURTO", "ROUBO", "Furto", "Roubo", "Furto de coisa comum"));
 
         // vai permitir a inserção em lotes
-        String instrucaoSql = "INSERT INTO Crime(natureza, dataOcorrencia, descricao, fkLogradouro, fkLocal) VALUES(?, ?, ?, ?, ?)";
+        String instrucaoSql = "INSERT INTO Crime(natureza, dataOcorrencia, artigo, fkLogradouro, fkLocal) VALUES(?, ?, ?, ?, ?)";
         PreparedStatement prepararLote = ctx.prepareStatement(instrucaoSql);
 
         for (int i = 1; i < planilha.size(); i++) {
@@ -218,10 +223,10 @@ public class ManipularDados {
             String natureza = conversor.validarValorTexto(planilha.get(i).get(22));
 
             // 20 -> coluna com a descrição do crime
-            String descricao = conversor.validarValorTexto(planilha.get(i).get(20));
+            String artigo = conversor.validarValorTexto(planilha.get(i).get(21));
 
             // Verifique se a natureza e a descrição estão nos tipos permitidos
-            if (tiposPermitidos.contains(natureza) || tiposPermitidos.contains(descricao)) {
+            if (tiposPermitidos.contains(natureza)) {
 
                 // 7 -> coluna com a data da ocorrência
                 String dataOcorrencia = conversor.tranformarPadraoDataAnoMesDia(planilha.get(i).get(7), planilha.get(i).get(8));
@@ -235,18 +240,22 @@ public class ManipularDados {
                 String local = conversor.validarValorTexto(planilha.get(i).get(10));
                 Integer idLocal = conversor.validarConsultaLocalPorNome(locais, local);
 
-                prepararLote.setString(1, natureza);
-                prepararLote.setString(2, dataOcorrencia);
-                prepararLote.setString(3, descricao);
-                if (idLogradouro == 0) {
-                    prepararLote.setNull(4, java.sql.Types.INTEGER);
-                } else {
-                    prepararLote.setInt(4, idLogradouro);
-                }
-                if (idLocal == 0) {
-                    prepararLote.setNull(5, java.sql.Types.INTEGER);
-                } else {
-                    prepararLote.setInt(5, idLocal);
+                if(natureza.toLowerCase().contains("furto")){
+
+                    Furto furto = new Furto(0, dataOcorrencia, idLogradouro, idLocal, artigo);
+                    prepararLote.setString(1, furto.getNatureza());
+                    prepararLote.setString(2, furto.getDataOcorrencia());
+                    prepararLote.setString(3, furto.getArtigo());
+                    prepararLote.setObject(4, furto.getFkLogradouro() == 0 ? null : idLogradouro, java.sql.Types.INTEGER);
+                    prepararLote.setObject(5, furto.getFkLocal() == 0 ? null : idLocal, java.sql.Types.INTEGER);
+                } else{
+
+                    Roubo roubo = new Roubo(0, dataOcorrencia, idLogradouro, idLocal, artigo);
+                    prepararLote.setString(1, roubo.getNatureza());
+                    prepararLote.setString(2, roubo.getDataOcorrencia());
+                    prepararLote.setString(3, roubo.getArtigo());
+                    prepararLote.setObject(4, roubo.getFkLogradouro() == 0 ? null : idLogradouro, java.sql.Types.INTEGER);
+                    prepararLote.setObject(5, roubo.getFkLocal() == 0 ? null : idLocal, java.sql.Types.INTEGER);
                 }
                 prepararLote.addBatch();
             }
@@ -265,7 +274,8 @@ public class ManipularDados {
         prepararLote.executeBatch();
         ctx.commit();
 
-        new GerarLog("extrairCrimes", "Finalizando extração das informações");
+        SlackNotifier.sendNotification("Atualização da base dos Crimes finalizada...");
+        new GerarLog("extrairCrimes", "Finalizando extração das informações (Quantidade total lida: " + planilha.size() + ")");
         S3Logs.subirArquivoBucket("extrairCrimes");
     }
 }

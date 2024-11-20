@@ -1,6 +1,7 @@
 package utils;
 
 import conexao.banco.Bairro;
+import conexao.banco.Crime;
 import conexao.banco.Local;
 import conexao.banco.Logradouro;
 
@@ -9,10 +10,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class ManipularDadosUtils {
 
@@ -82,5 +80,37 @@ public class ManipularDadosUtils {
                 .findFirst()
                 .orElse(0);
         return idBairro;
+    }
+
+    public List<Bairro> associarRuasAoBairro(List<Logradouro> ruas, List<Bairro> bairros){
+
+        List<Bairro> bairrosComRuasAssociadas = new ArrayList<>();
+        for (Bairro item : bairros) {
+
+            Bairro b = new Bairro(item.getIdBairro(), item.getNome());
+            for(Logradouro rua : ruas){
+                if(rua.getFkBairro().equals(item.getIdBairro())){
+                    b.addLogradouro(rua);
+                }
+            }
+            bairrosComRuasAssociadas.add(b);
+        }
+        return bairrosComRuasAssociadas;
+    }
+
+    public List<Logradouro> associarCrimesAoLogradouro(List<Logradouro> ruas, List<Crime> crimes){
+
+        List<Logradouro> logradourosComCrimesAssociados = new ArrayList<>();
+        for (Logradouro item : ruas) {
+
+            Logradouro l = new Logradouro(item.getIdLogradouro(), item.getNome(), item.getNumero(), item.getFkBairro(), item.getLatitude() , item.getLongitude());
+            for(Crime crime : crimes){
+                  if(crime.getFkLogradouro().equals(l.getIdLogradouro())){
+                      l.addCrime(crime);
+                  }
+            }
+            logradourosComCrimesAssociados.add(l);
+        }
+        return logradourosComCrimesAssociados;
     }
 }

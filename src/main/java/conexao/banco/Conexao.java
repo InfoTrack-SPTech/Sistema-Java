@@ -66,12 +66,12 @@ public class Conexao {
                 idCrime INT AUTO_INCREMENT PRIMARY KEY,
                 natureza VARCHAR(100) ,
                 dataOcorrencia DATETIME,
-                descricao VARCHAR(255),     \s
+                artigo VARCHAR(50),
                 fkLogradouro INT,
                 fkLocal INT,
                 FOREIGN KEY (fkLogradouro) REFERENCES Logradouro(idLogradouro),
                 FOREIGN KEY (fkLocal) REFERENCES Local(idLocal)
-            );  
+            );
         """);
 
         conectarBd.execute("""
@@ -88,6 +88,34 @@ public class Conexao {
                 SELECT 'InfoTrack', '12345678000199', '11999999999'
                 WHERE NOT EXISTS (
                     SELECT 1 FROM Empresa WHERE cnpj = '12345678000199'
+            );
+        """);
+        conectarBd.execute("""
+            INSERT INTO Empresa (nome, cnpj, telefone)
+                SELECT 'Sem Parar', '74125896369852', '11978642892'
+                WHERE NOT EXISTS (
+                    SELECT 1 FROM Empresa WHERE cnpj = '74125896369852'
+            );
+        """);
+        conectarBd.execute("""
+            INSERT INTO Empresa (nome, cnpj, telefone)
+                SELECT 'C6 Bank', '88888888888888', '11940872213'
+                WHERE NOT EXISTS (
+                    SELECT 1 FROM Empresa WHERE cnpj = '88888888888888'
+            );
+        """);
+        conectarBd.execute("""
+            INSERT INTO Empresa (nome, cnpj, telefone)
+                SELECT 'Minsait', '99999999999999', '11955936541'
+                WHERE NOT EXISTS (
+                    SELECT 1 FROM Empresa WHERE cnpj = '99999999999999'
+            );
+        """);
+        conectarBd.execute("""
+            INSERT INTO Empresa (nome, cnpj, telefone)
+                SELECT 'Stefanine', '78945612365478', '11955936541'
+                WHERE NOT EXISTS (
+                    SELECT 1 FROM Empresa WHERE cnpj = '78945612365478'
             );
         """);
 
