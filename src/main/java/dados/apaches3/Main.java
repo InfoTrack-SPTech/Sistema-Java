@@ -3,6 +3,8 @@ package dados.apaches3;
 import conexao.banco.*;
 import log.datas.GerarLog;
 import log.datas.S3Logs;
+import log.datas.SlackNotificador;
+import log.datas.SlackNotificador;
 import org.springframework.jdbc.core.JdbcTemplate;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.core.sync.ResponseTransformer;
@@ -35,21 +37,36 @@ public class Main {
     }
 
     public static void main(String[] args) throws Exception {
+        
+        SlackNotificador.envioNotificacao("Iniciando Atualização da base");
 
         S3Client s3Client = new S3Provider().getS3Client();
         S3Logs.listarBuckets(s3Client);
         ListObjectsRequest listObj = S3Logs.listarObjetosBucket(s3Client);
         if(baixarConteudo){
+
+            SlackNotificador.envioNotificacao("Baixando Contéudo do S3...");
             S3Logs.baixarObjetosBucket(s3Client, listObj);
         }
 
+        SlackNotificador.envioNotificacao("Contéudo do S3 baixado...");
         System.out.println("Iniciando Leitura...");
         List<List<Object>> planilha = LeitorExcel.extrairDadosPlanilha("./arquivos/SPDadosCriminais_2024.xlsx");
 
         ManipularDados manipular = new ManipularDados();
+
+        SlackNotificador.envioNotificacao("Iniciando Atualização - 0%");
         manipular.extrairBairros(planilha);
+
+        SlackNotificador.envioNotificacao("Atualização em Andamento - 25%");
         manipular.extrairLocais(planilha);
+
+        SlackNotificador.envioNotificacao("Atualização em Andamento - 50%");
         manipular.extrairLogradouro(planilha);
+
+        SlackNotificador.envioNotificacao("Atualização em Andamento - 75%");
         manipular.extrairCrimes(planilha);
+
+        SlackNotificador.envioNotificacao("Atualização Finalizada - 100%");
     }
 }

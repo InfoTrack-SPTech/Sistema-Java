@@ -1,5 +1,6 @@
 package conexao.banco;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Logradouro {
@@ -11,6 +12,22 @@ public class Logradouro {
     private String latitude;
     private String longitude;
     private List<Crime> crimes;
+
+    public Logradouro() {}
+
+    public Logradouro(Integer idLogradouro, String nome, String numero, Integer fkBairro, String latitude, String longitude) {
+        this.idLogradouro = idLogradouro;
+        this.nome = nome;
+        this.numero = numero;
+        this.fkBairro = fkBairro;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.crimes = new ArrayList<>();
+    }
+
+    public void addCrime(Crime crime){
+        crimes.add(crime);
+    }
 
     public void setIdLogradouro(Integer idLogradouro) {
         this.idLogradouro = idLogradouro;
@@ -60,16 +77,12 @@ public class Logradouro {
         this.latitude = latitude;
     }
 
-    @Override
-    public String toString() {
-        return "Logradouro{" +
-                "idLogradouro=" + idLogradouro +
-                ", nome='" + nome + '\'' +
-                ", numero='" + numero + '\'' +
-                ", latitude='" + latitude + '\'' +
-                ", longitude='" + longitude + '\'' +
-                ", fkBairro=" + fkBairro +
-                '}';
+    public List<Crime> getCrimes() {
+        return crimes;
+    }
+
+    public void setCrimes(List<Crime> crimes) {
+        this.crimes = new ArrayList<>();
     }
 }
 
