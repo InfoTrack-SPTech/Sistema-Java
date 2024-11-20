@@ -4,10 +4,10 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-public class SlackNotifier {
-    public static void sendNotification(String message) {
+public class SlackNotificador {
+    public static void envioNotificacao(String message) {
         try {
-            String webhookUrl ="";
+            String webhookUrl = "";
             URL url = new URL(webhookUrl);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("POST");

@@ -2,7 +2,8 @@ package conexao.banco;
 
 import log.datas.GerarLog;
 import log.datas.S3Logs;
-import log.datas.SlackNotifier;
+import log.datas.SlackNotificador;
+import log.datas.SlackNotificador;
 import utils.ManipularDadosUtils;
 
 import java.io.IOException;
@@ -33,7 +34,7 @@ public class ManipularDados {
 
         System.out.println("Iniciando extração dos Bairros");
         new GerarLog("extrairBairros", "Iniciando extração das informações");
-        SlackNotifier.sendNotification("Atualizando base de dados dos Bairros...");
+        SlackNotificador.envioNotificacao("Atualizando base de dados dos Bairros...");
         ctx.setAutoCommit(false);
 
         List<Bairro> bairros = Bd.consultarBairros();
@@ -67,7 +68,7 @@ public class ManipularDados {
         prepararLote.executeBatch();
         ctx.commit();
 
-        SlackNotifier.sendNotification("Atualização da base dos Bairros finalizada...");
+        SlackNotificador.envioNotificacao("Atualização da base dos Bairros finalizada...");
         new GerarLog("extrairBairros", "Finalizando extração das informações (Quantidade total lida: " + planilha.size() + ")");
         S3Logs.subirArquivoBucket("extrairBairros");
     }
@@ -76,7 +77,7 @@ public class ManipularDados {
 
         System.out.println("Iniciando extração dos Logradouros");
         new GerarLog("extrairLogradouro", "Iniciando extração das informações");
-        SlackNotifier.sendNotification("Atualizando base de dados dos Logradouros...");
+        SlackNotificador.envioNotificacao("Atualizando base de dados dos Logradouros...");
         ctx.setAutoCommit(false);
 
         List<Bairro> bairros = Bd.consultarBairros();
@@ -138,7 +139,7 @@ public class ManipularDados {
         prepararLote.executeBatch();
         ctx.commit();
 
-        SlackNotifier.sendNotification("Atualização da base dos Logradouros finalizada...");
+        SlackNotificador.envioNotificacao("Atualização da base dos Logradouros finalizada...");
         new GerarLog("extrairLogradouro", "Finalizando extração das informações (Quantidade total lida: " + planilha.size() + ")");
         S3Logs.subirArquivoBucket("extrairLogradouro");
     }
@@ -147,7 +148,7 @@ public class ManipularDados {
 
         System.out.println("Iniciando extração dos Locais");
         new GerarLog("extrairLocais", "Iniciando extração das informações");
-        SlackNotifier.sendNotification("Atualizando base de dados dos Locais...");
+        SlackNotificador.envioNotificacao("Atualizando base de dados dos Locais...");
         ctx.setAutoCommit(false);
 
         List<Local> locaisJaCadastrados = Bd.consultarLocais();
@@ -193,7 +194,7 @@ public class ManipularDados {
         prepararLote.executeBatch();
         ctx.commit();
 
-        SlackNotifier.sendNotification("Atualização da base dos Locais finalizada...");
+        SlackNotificador.envioNotificacao("Atualização da base dos Locais finalizada...");
         new GerarLog("extrairLocais", "Finalizando extração das informações (Quantidade total lida: " + planilha.size() + ")");
         S3Logs.subirArquivoBucket("extrairLocais");
     }
@@ -202,7 +203,7 @@ public class ManipularDados {
 
         System.out.println("Iniciando extração dos Crimes");
         new GerarLog("extrairCrimes", "Iniciando extração das informações");
-        SlackNotifier.sendNotification("Atualizando base de dados dos Crimes...");
+        SlackNotificador.envioNotificacao("Atualizando base de dados dos Crimes...");
         ctx.setAutoCommit(false);
 
         // Faz uma consulta no banco para pegar as informacoes cadastradas
@@ -274,7 +275,7 @@ public class ManipularDados {
         prepararLote.executeBatch();
         ctx.commit();
 
-        SlackNotifier.sendNotification("Atualização da base dos Crimes finalizada...");
+        SlackNotificador.envioNotificacao("Atualização da base dos Crimes finalizada...");
         new GerarLog("extrairCrimes", "Finalizando extração das informações (Quantidade total lida: " + planilha.size() + ")");
         S3Logs.subirArquivoBucket("extrairCrimes");
     }

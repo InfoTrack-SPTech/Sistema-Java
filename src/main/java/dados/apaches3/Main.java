@@ -3,7 +3,8 @@ package dados.apaches3;
 import conexao.banco.*;
 import log.datas.GerarLog;
 import log.datas.S3Logs;
-import log.datas.SlackNotifier;
+import log.datas.SlackNotificador;
+import log.datas.SlackNotificador;
 import org.springframework.jdbc.core.JdbcTemplate;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.core.sync.ResponseTransformer;
@@ -37,35 +38,35 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
         
-        SlackNotifier.sendNotification("Iniciando Atualização da base");
+        SlackNotificador.envioNotificacao("Iniciando Atualização da base");
 
         S3Client s3Client = new S3Provider().getS3Client();
         S3Logs.listarBuckets(s3Client);
         ListObjectsRequest listObj = S3Logs.listarObjetosBucket(s3Client);
         if(baixarConteudo){
 
-            SlackNotifier.sendNotification("Baixando Contéudo do S3...");
+            SlackNotificador.envioNotificacao("Baixando Contéudo do S3...");
             S3Logs.baixarObjetosBucket(s3Client, listObj);
         }
 
-        SlackNotifier.sendNotification("Contéudo do S3 baixado...");
+        SlackNotificador.envioNotificacao("Contéudo do S3 baixado...");
         System.out.println("Iniciando Leitura...");
         List<List<Object>> planilha = LeitorExcel.extrairDadosPlanilha("./arquivos/SPDadosCriminais_2024.xlsx");
 
         ManipularDados manipular = new ManipularDados();
 
-        SlackNotifier.sendNotification("Iniciando Atualização - 0%");
+        SlackNotificador.envioNotificacao("Iniciando Atualização - 0%");
         manipular.extrairBairros(planilha);
 
-        SlackNotifier.sendNotification("Atualização em Andamento - 25%");
+        SlackNotificador.envioNotificacao("Atualização em Andamento - 25%");
         manipular.extrairLocais(planilha);
 
-        SlackNotifier.sendNotification("Atualização em Andamento - 50%");
+        SlackNotificador.envioNotificacao("Atualização em Andamento - 50%");
         manipular.extrairLogradouro(planilha);
 
-        SlackNotifier.sendNotification("Atualização em Andamento - 75%");
+        SlackNotificador.envioNotificacao("Atualização em Andamento - 75%");
         manipular.extrairCrimes(planilha);
 
-        SlackNotifier.sendNotification("Atualização Finalizada - 100%");
+        SlackNotificador.envioNotificacao("Atualização Finalizada - 100%");
     }
 }
