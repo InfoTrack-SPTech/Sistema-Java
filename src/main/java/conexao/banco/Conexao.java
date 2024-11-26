@@ -151,6 +151,7 @@ public class Conexao {
                 nome VARCHAR(80) NOT NULL,
                 senha VARCHAR(60) NOT NULL,\s
                 telefone VARCHAR(15),       \s
+                imagem VARCHAR(50),
                 fkCargo INT NOT NULL,
                 FOREIGN KEY (fkCargo) REFERENCES Cargo(idCargo),
                 fkEmpresa INT NOT NULL,
